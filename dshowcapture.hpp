@@ -214,6 +214,8 @@ namespace DShow {
 		~Device();
 
 		bool        Valid() const;
+		void        GetAccess();
+		void        ReleaseAccess();
 
 		bool        ResetGraph();
 		void        ShutdownGraph();
