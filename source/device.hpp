@@ -21,6 +21,7 @@
 
 #include "../dshowcapture.hpp"
 #include "capture-filter.hpp"
+#include <mutex>
 
 #include <string>
 #include <vector>
@@ -69,6 +70,8 @@ struct HDevice {
 	EncodedData encodedVideo;
 	EncodedData encodedAudio;
 
+	std::mutex                     access_mutex;
+
 	HDevice();
 	~HDevice();
 
@@ -78,6 +81,8 @@ struct HDevice {
 	bool EnsureInitialized(const wchar_t *func);
 	bool EnsureActive(const wchar_t *func);
 	bool EnsureInactive(const wchar_t *func);
+	void GetAccess();
+	void ReleaseAccess();
 
 	inline void SendToCallback(bool video, unsigned char *data, size_t size,
 				   long long startTime, long long stopTime);

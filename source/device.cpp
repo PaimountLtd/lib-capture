@@ -73,7 +73,7 @@ bool HDevice::EnsureActive(const wchar_t *func)
 	return true;
 }
 
-bool HDevice::EnsureInactive(const wchar_t *func)
+bool HDevice::EnsureInactive(const wchar_t* func)
 {
 	if (active) {
 		Error(L"%s: cannot be used while active", func);
@@ -83,9 +83,19 @@ bool HDevice::EnsureInactive(const wchar_t *func)
 	return true;
 }
 
-inline void HDevice::SendToCallback(bool video, unsigned char *data,
-				    size_t size, long long startTime,
-				    long long stopTime)
+void HDevice::GetAccess()
+{
+	access_mutex.lock();
+}
+
+void HDevice::ReleaseAccess()
+{
+	access_mutex.unlock();
+}
+
+inline void HDevice::SendToCallback(bool video,
+		unsigned char *data, size_t size,
+		long long startTime, long long stopTime)
 {
 	if (!size)
 		return;
@@ -108,50 +118,59 @@ void HDevice::Receive(bool isVideo, IMediaSample *sample)
 	if (!sample)
 		return;
 
-	if (isVideo ? !videoConfig.callback : !audioConfig.callback)
+	if( !access_mutex.try_lock() )
 		return;
 
-	if (sample->GetMediaType(&mt) == S_OK) {
-		if (isVideo) {
-			videoMediaType = mt;
-			ConvertVideoSettings();
-		} else {
-			audioMediaType = mt;
-			ConvertAudioSettings();
-		}
-	}
+	if (isVideo ? videoConfig.callback != NULL : audioConfig.callback != NULL) {
+		MediaTypePtr mt;
 
-	int size = sample->GetActualDataLength();
-	if (!size)
-		return;
-
-	if (FAILED(sample->GetPointer(&ptr)))
-		return;
-
-	long long startTime, stopTime;
-	bool hasTime = SUCCEEDED(sample->GetTime(&startTime, &stopTime));
-
-	if (encoded) {
-		EncodedData &data = isVideo ? encodedVideo : encodedAudio;
-
-		/* packets that have time are the first packet in a group of
-		 * segments */
-		if (hasTime) {
-			SendToCallback(isVideo, data.bytes.data(),
-				       data.bytes.size(), data.lastStartTime,
-				       data.lastStopTime);
-
-			data.bytes.resize(0);
-			data.lastStartTime = startTime;
-			data.lastStopTime = stopTime;
+		if (sample->GetMediaType(&mt) == S_OK) {
+			if (isVideo) {
+				videoMediaType = mt;
+				ConvertVideoSettings();
+			} else {
+				audioMediaType = mt;
+				ConvertAudioSettings();
+			}
 		}
 
-		data.bytes.insert(data.bytes.end(), (unsigned char *)ptr,
-				  (unsigned char *)ptr + size);
+		int size = sample->GetActualDataLength();
+		if (size) {
+			BYTE* ptr;
+			if (SUCCEEDED(sample->GetPointer(&ptr))) {
+				long long startTime, stopTime;
+				bool hasTime = SUCCEEDED(sample->GetTime(&startTime, &stopTime));
 
-	} else if (hasTime) {
-		SendToCallback(isVideo, ptr, size, startTime, stopTime);
+				bool encoded = isVideo ?
+					((int)videoConfig.format >= 400) :
+					((int)audioConfig.format >= 200);
+
+				if (encoded) {
+					EncodedData &data = isVideo ? encodedVideo : encodedAudio;
+
+					/* packets that have time are the first packet in a group of
+					 * segments */
+					if (hasTime) {
+						SendToCallback(isVideo,
+								data.bytes.data(), data.bytes.size(),
+								data.lastStartTime, data.lastStopTime);
+
+						data.bytes.resize(0);
+						data.lastStartTime = startTime;
+						data.lastStopTime  = stopTime;
+					}
+
+					data.bytes.insert(data.bytes.end(),
+							(unsigned char*)ptr,
+							(unsigned char*)ptr + size);
+
+				} else if (hasTime) {
+					SendToCallback(isVideo, ptr, size, startTime, stopTime);
+				}
+			}
+		}
 	}
+	ReleaseAccess();
 }
 
 void HDevice::ConvertVideoSettings()
@@ -782,6 +801,7 @@ Result HDevice::Start()
 	}
 
 	active = true;
+
 	return Result::Success;
 }
 

@@ -207,7 +207,9 @@ public:
 	Device(InitGraph initialize = InitGraph::False);
 	~Device();
 
-	bool Valid() const;
+	bool        Valid() const;
+	void        GetAccess();
+	void        ReleaseAccess();
 
 	bool ResetGraph();
 	void ShutdownGraph();
