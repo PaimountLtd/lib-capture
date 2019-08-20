@@ -56,18 +56,19 @@ void Device::ReleaseAccess()
 
 bool Device::ResetGraph()
 {
-	Warning(L"Reset Graph()");
+	Warning(L"Reset Graph() started");
 
 	// disconnect filters before recreating device to be shure that they not be in use 
-	context->DisconnectFilters();
+	//context->DisconnectFilters();
 
 	context->ReleaseAccess();
-
+	Warning(L"Reset Graph() before delete of device");
 	// cheap and easy way to clear all the filters 
 	delete context;
 	context = new HDevice;
 
 	context->GetAccess();
+	Warning(L"Reset Graph() finished");
 	return context->CreateGraph();
 }
 
