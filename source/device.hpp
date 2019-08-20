@@ -21,7 +21,7 @@
 
 #include "../dshowcapture.hpp"
 #include "capture-filter.hpp"
-#include <mutex>
+#include <shared_mutex>
 
 #include <string>
 #include <vector>
@@ -70,7 +70,7 @@ struct HDevice {
 	EncodedData encodedVideo;
 	EncodedData encodedAudio;
 
-	std::mutex                     access_mutex;
+	mutable std::shared_mutex      access_mutex;
 
 	HDevice();
 	~HDevice();
