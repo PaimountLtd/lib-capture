@@ -117,7 +117,7 @@ void HDevice::Receive(bool isVideo, IMediaSample *sample)
 	if (!sample)
 		return;
 
-	if( !access_mutex.try_lock() )
+	if( !access_mutex.try_lock_shared() )
 		return;
 
 	if (isVideo ? videoConfig.callback != NULL : audioConfig.callback != NULL) {
@@ -169,7 +169,7 @@ void HDevice::Receive(bool isVideo, IMediaSample *sample)
 			}
 		}
 	}
-	ReleaseAccess();
+	access_mutex.unlock_shared();
 }
 
 void HDevice::ConvertVideoSettings()
