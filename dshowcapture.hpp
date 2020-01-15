@@ -20,6 +20,7 @@
 #pragma once
 
 #include <vector>
+#include <unordered_map>
 #include <string>
 #include <functional>
 
@@ -205,6 +206,54 @@ struct AudioConfig : Config {
 	AudioMode mode = AudioMode::Capture;
 };
 
+enum SettingsFlags {
+    Auto	= 0x1,
+    Manual	= 0x2
+};
+
+struct DeviceSettings {
+    std::string devicePath;
+    std::string deviceName;
+    // VideoProcAmp settings
+    long backlightCompensation;
+    long backlightCompensationFlag = SettingsFlags::Manual;
+    long brightness;
+    long brightnessFlag = SettingsFlags::Manual;
+    long colorEnable;
+    long colorEnableFlag = SettingsFlags::Manual;
+    long contrast;
+    long contrastFlag = SettingsFlags::Manual;
+    long gain;
+    long gainFlag = SettingsFlags::Manual;
+    long gamma;
+    long gammaFlag = SettingsFlags::Manual;
+    long hue;
+    long hueFlag = SettingsFlags::Manual;
+    long saturation;
+    long saturationFlag = SettingsFlags::Manual;
+    long sharpness;
+    long sharpnessFlag = SettingsFlags::Manual;
+    long whiteBalance;
+    long whiteBalanceFlag = SettingsFlags::Manual;
+    // CameraControl settings
+    long exposure;
+    long exposureFlag = SettingsFlags::Manual;
+    long focus;
+    long focusFlag = SettingsFlags::Manual;
+    long iris;
+    long irisFlag = SettingsFlags::Manual;
+    long pan;
+    long panFlag = SettingsFlags::Manual;
+    long roll;
+    long rollFlag = SettingsFlags::Manual;
+    long tilt;
+    long tiltFlag = SettingsFlags::Manual;
+    long zoom;
+    long zoomFlag = SettingsFlags::Manual;
+};
+
+typedef std::unordered_map<std::string, DeviceSettings> SettingsContainer;
+
 class DSHOWCAPTURE_EXPORT Device {
 	HDevice *context;
 	DeviceDialogBox *videoDialog;
@@ -219,11 +268,16 @@ public:
 	void        GetAccess();
 	void        ReleaseAccess();
 
+	SettingsContainer settings;
+
 	bool ResetGraph();
 	void ShutdownGraph();
 
 	bool SetVideoConfig(VideoConfig *config);
 	bool SetAudioConfig(AudioConfig *config);
+
+	void SaveSettings(const std::string& filePath);
+	void LoadSettings(const std::string& filePath);
 
 	/**
 		 * Connects all the configured filters together.

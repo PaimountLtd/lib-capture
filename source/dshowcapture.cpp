@@ -21,6 +21,7 @@
 #include "dshow-base.hpp"
 #include "dshow-enum.hpp"
 #include "dshow-dialogbox.hpp"
+#include "dshow-settings.hpp"
 #include "device.hpp"
 #include "dshow-device-defs.hpp"
 #include "log.hpp"
@@ -32,7 +33,8 @@ Device::Device(InitGraph initialize) :
 	context(new HDevice),
 	videoDialog(new DeviceDialogBox),
 	crossbarDialog(new DeviceDialogBox),
-	audioDialog(new DeviceDialogBox)
+	audioDialog(new DeviceDialogBox),
+	settings()
 {
 	if (initialize == InitGraph::True)
 		context->CreateGraph();
@@ -90,6 +92,15 @@ bool Device::SetAudioConfig(AudioConfig *config)
 	return context->SetAudioConfig(config);
 }
 
+void Device::SaveSettings(const std::string& filePath) {
+    SaveSettingsToFile(filePath + "device-settings.cfg");
+}
+
+void Device::LoadSettings(const std::string& filePath) {
+    settings.clear();
+    LoadSettingsFromFile(filePath + "device-settings.cfg", settings);
+}
+
 bool Device::ConnectFilters()
 {
 	return context->ConnectFilters();
@@ -139,6 +150,25 @@ bool Device::GetAudioDeviceId(DeviceId &id) const
 
 	id = context->audioConfig;
 	return true;
+}
+
+static void OpenPropertyPages(HWND hwnd, IUnknown *propertyObject)
+{
+	if (!propertyObject)
+		return;
+
+	ComQIPtr<ISpecifyPropertyPages> pages(propertyObject);
+	CAUUID cauuid;
+
+	if (pages != NULL) {
+		if (SUCCEEDED(pages->GetPages(&cauuid)) && cauuid.cElems) {
+			OleCreatePropertyFrame(hwnd, 0, 0, NULL, 1,
+					       (LPUNKNOWN *)&propertyObject,
+					       cauuid.cElems, cauuid.pElems, 0,
+					       0, NULL);
+			CoTaskMemFree(cauuid.pElems);
+		}
+	}
 }
 
 void Device::OpenDialog(void *hwnd, DialogType type) const
