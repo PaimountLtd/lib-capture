@@ -12,6 +12,10 @@ namespace DShow {
         ComPtr<IPropertyBag> propertyBag;
         HRESULT hr;
 
+        if (enumMoniker == nullptr) {
+            return;
+        }
+
         while (enumMoniker->Next(1, &moniker, nullptr) == S_OK) {
             hr = moniker->BindToStorage(nullptr, nullptr, IID_IPropertyBag, (void **)&propertyBag);
             if (FAILED(hr)) {
@@ -75,6 +79,10 @@ namespace DShow {
         std::stringstream line;
         long value, flag;
         HRESULT hr;
+
+        if (enumMoniker == nullptr) {
+            return;
+        }
 
         while (enumMoniker->Next(1, &moniker, nullptr) == S_OK) {
             hr = moniker->BindToStorage(nullptr, nullptr, IID_IPropertyBag, (void **)&propertyBag);
