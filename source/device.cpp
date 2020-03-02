@@ -93,16 +93,16 @@ void HDevice::ReleaseAccess()
 	access_mutex.unlock();
 }
 
-inline void HDevice::SendToCallback(bool video,
-		unsigned char *data, size_t size,
-		long long startTime, long long stopTime)
+inline void HDevice::SendToCallback(bool video, unsigned char *data,
+				    size_t size, long long startTime,
+				    long long stopTime, long rotation)
 {
 	if (!size)
 		return;
 
 	if (video)
 		videoConfig.callback(videoConfig, data, size, startTime,
-				     stopTime);
+				     stopTime, rotation);
 	else
 		audioConfig.callback(audioConfig, data, size, startTime,
 				     stopTime);
@@ -112,6 +112,7 @@ void HDevice::Receive(bool isVideo, IMediaSample *sample)
 {
 	BYTE *ptr;
 	MediaTypePtr mt;
+	long roll = 0;
 	bool encoded = isVideo ? ((int)videoConfig.format >= 400)
 			       : ((int)audioConfig.format >= 200);
 
@@ -121,54 +122,58 @@ void HDevice::Receive(bool isVideo, IMediaSample *sample)
 	if( !access_mutex.try_lock_shared() )
 		return;
 
-	if (isVideo ? videoConfig.callback != NULL : audioConfig.callback != NULL) {
-		MediaTypePtr mt;
+	if (isVideo ? !videoConfig.callback : !audioConfig.callback)
+		return;
 
-		if (sample->GetMediaType(&mt) == S_OK) {
-			if (isVideo) {
-				videoMediaType = mt;
-				ConvertVideoSettings();
-			} else {
-				audioMediaType = mt;
-				ConvertAudioSettings();
-			}
+	/* auto-rotation for devices such as streamcam */
+	if (isVideo && rotatableDevice) {
+		ComQIPtr<IAMCameraControl> cc(videoFilter);
+		if (cc) {
+			long ccf = 0;
+			cc->Get(CameraControl_Roll, &roll, &ccf);
+		}
+	}
+
+	if (sample->GetMediaType(&mt) == S_OK) {
+		if (isVideo) {
+			videoMediaType = mt;
+			ConvertVideoSettings();
+		} else {
+			audioMediaType = mt;
+			ConvertAudioSettings();
+		}
+	}
+
+	int size = sample->GetActualDataLength();
+	if (!size)
+		return;
+
+	if (FAILED(sample->GetPointer(&ptr)))
+		return;
+
+	long long startTime, stopTime;
+	bool hasTime = SUCCEEDED(sample->GetTime(&startTime, &stopTime));
+
+	if (encoded) {
+		EncodedData &data = isVideo ? encodedVideo : encodedAudio;
+
+		/* packets that have time are the first packet in a group of
+		 * segments */
+		if (hasTime) {
+			SendToCallback(isVideo, data.bytes.data(),
+				       data.bytes.size(), data.lastStartTime,
+				       data.lastStopTime, roll);
+
+			data.bytes.resize(0);
+			data.lastStartTime = startTime;
+			data.lastStopTime  = stopTime;
 		}
 
-		int size = sample->GetActualDataLength();
-		if (size) {
-			BYTE* ptr;
-			if (SUCCEEDED(sample->GetPointer(&ptr))) {
-				long long startTime, stopTime;
-				bool hasTime = SUCCEEDED(sample->GetTime(&startTime, &stopTime));
+			data.bytes.insert(data.bytes.end(), (unsigned char *)ptr,
+							  (unsigned char *)ptr + size);
 
-				bool encoded = isVideo ?
-					((int)videoConfig.format >= 400) :
-					((int)audioConfig.format >= 200);
-
-				if (encoded) {
-					EncodedData &data = isVideo ? encodedVideo : encodedAudio;
-
-					/* packets that have time are the first packet in a group of
-					 * segments */
-					if (hasTime) {
-						SendToCallback(isVideo,
-								data.bytes.data(), data.bytes.size(),
-								data.lastStartTime, data.lastStopTime);
-
-						data.bytes.resize(0);
-						data.lastStartTime = startTime;
-						data.lastStopTime  = stopTime;
-					}
-
-					data.bytes.insert(data.bytes.end(),
-							(unsigned char*)ptr,
-							(unsigned char*)ptr + size);
-
-				} else if (hasTime) {
-					SendToCallback(isVideo, ptr, size, startTime, stopTime);
-				}
-			}
-		}
+	} else if (hasTime) {
+		SendToCallback(isVideo, ptr, size, startTime, stopTime, roll);
 	}
 	access_mutex.unlock_shared();
 }
@@ -182,7 +187,8 @@ void HDevice::ConvertVideoSettings()
 		Debug(L"Video media type changed");
 
 		videoConfig.cx = bmih->biWidth;
-		videoConfig.cy = bmih->biHeight;
+		videoConfig.cy_abs = labs(bmih->biHeight);
+		videoConfig.cy_flip = bmih->biHeight < 0;
 		videoConfig.frameInterval = vih->AvgTimePerFrame;
 
 		bool same = videoConfig.internalFormat == videoConfig.format;
@@ -268,6 +274,9 @@ bool HDevice::SetupVideoCapture(IBaseFilter *filter, VideoConfig &config)
 
 	else if (config.name.find(HD_PVR1_NAME) != std::string::npos)
 		return SetupEncodedVideoCapture(filter, config, HD_PVR1);
+
+	rotatableDevice = videoConfig.name.find(L"StreamCam") !=
+			  std::string::npos;
 
 	success = GetFilterPin(filter, MEDIATYPE_Video, PIN_CATEGORY_CAPTURE,
 			       PINDIR_OUTPUT, &pin);
