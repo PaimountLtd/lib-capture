@@ -49,6 +49,7 @@ struct HDevice;
 struct HVideoEncoder;
 struct VideoConfig;
 struct AudioConfig;
+struct DeviceDialogBox;
 
 typedef std::function<void(const VideoConfig &config, unsigned char *data,
 			   size_t size, long long startTime, long long stopTime)>
@@ -202,6 +203,9 @@ struct AudioConfig : Config {
 
 class DSHOWCAPTURE_EXPORT Device {
 	HDevice *context;
+	DeviceDialogBox *videoDialog;
+	DeviceDialogBox *crossbarDialog;
+	DeviceDialogBox *audioDialog;
 
 public:
 	Device(InitGraph initialize = InitGraph::False);
@@ -238,6 +242,7 @@ public:
 		 * @param  type  The dialog type
 		 */
 	void OpenDialog(void *hwnd, DialogType type) const;
+	void CloseDialog();
 
 	static bool EnumVideoDevices(std::vector<VideoDevice> &devices);
 	static bool EnumAudioDevices(std::vector<AudioDevice> &devices);
