@@ -287,11 +287,11 @@ static bool EnumVideoDevice(std::vector<VideoDevice> &devices,
 	return true;
 }
 
-bool Device::EnumVideoDevices(std::vector<VideoDevice> &devices)
+bool Device::EnumVideoDevices(std::vector<VideoDevice> &devices, bool activate)
 {
 	devices.clear();
 	return EnumDevices(CLSID_VideoInputDeviceCategory,
-			   EnumDeviceCallback(EnumVideoDevice), &devices);
+			   EnumDeviceCallback(EnumVideoDevice), &devices, activate);
 }
 
 static bool EnumAudioDevice(vector<AudioDevice> &devices, IBaseFilter *filter,
@@ -317,11 +317,11 @@ static bool EnumAudioDevice(vector<AudioDevice> &devices, IBaseFilter *filter,
 	return true;
 }
 
-bool Device::EnumAudioDevices(vector<AudioDevice> &devices)
+bool Device::EnumAudioDevices(vector<AudioDevice> &devices, bool activate)
 {
 	devices.clear();
 	return EnumDevices(CLSID_AudioInputDeviceCategory,
-			   EnumDeviceCallback(EnumAudioDevice), &devices);
+			   EnumDeviceCallback(EnumAudioDevice), &devices, activate);
 }
 
 }; /* namespace DShow */
