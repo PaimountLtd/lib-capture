@@ -133,7 +133,7 @@ bool GetDeviceFilter(const IID &type, const wchar_t *name, const wchar_t *path,
 	info.name = name;
 	info.path = path;
 
-	if (!EnumDevices(type, EnumDeviceCallback(GetDeviceCallback), &info))
+	if (!EnumDevices(type, EnumDeviceCallback(GetDeviceCallback), &info, true))
 		return false;
 
 	if (info.filter != NULL) {

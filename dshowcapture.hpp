@@ -243,8 +243,8 @@ public:
 		 */
 	void OpenDialog(void *hwnd, DialogType type) const;
 
-	static bool EnumVideoDevices(std::vector<VideoDevice> &devices);
-	static bool EnumAudioDevices(std::vector<AudioDevice> &devices);
+	static bool EnumVideoDevices(std::vector<VideoDevice> &devices, bool activate);
+	static bool EnumAudioDevices(std::vector<AudioDevice> &devices, bool activate);
 };
 
 struct VideoEncoderConfig : DeviceId {

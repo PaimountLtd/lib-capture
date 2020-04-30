@@ -104,7 +104,7 @@ bool VideoEncoder::EnumEncoders(vector<DeviceId> &encoders)
 {
 	encoders.clear();
 	return EnumDevices(KSCATEGORY_ENCODER,
-			   EnumDeviceCallback(EnumVideoEncoder), &encoders);
+			   EnumDeviceCallback(EnumVideoEncoder), &encoders, true);
 }
 
 };
