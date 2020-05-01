@@ -2,7 +2,7 @@
 
 #include "../dshowcapture.hpp"
 #include "dshow-base.hpp"
-#include "external/json.hpp"
+#include "json.hpp"
 #include <vector>
 
 namespace DShow {
