@@ -29,6 +29,7 @@
 #include <vector>
 
 namespace DShow {
+
 Device::Device(InitGraph initialize) :
 	context(new HDevice),
 	videoDialog(new DeviceDialogBox),
@@ -93,12 +94,11 @@ bool Device::SetAudioConfig(AudioConfig *config)
 }
 
 void Device::SaveSettings(const std::string& filePath) {
-    SaveSettingsToFile(filePath + "device-settings.cfg");
+    SaveSettingsToFile(filePath + "device-settings.json");
 }
 
 void Device::LoadSettings(const std::string& filePath) {
-    settings.clear();
-    LoadSettingsFromFile(filePath + "device-settings.cfg", settings);
+    LoadSettingsFromFile(filePath + "device-settings.json");
 }
 
 bool Device::ConnectFilters()
