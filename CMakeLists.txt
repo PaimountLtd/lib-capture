@@ -85,7 +85,6 @@ set(libdshowcapture_SOURCES
 set(libdshowcapture_HEADERS
 	dshowcapture.hpp
 	source/external/IVideoCaptureFilter.h
-	source/external/json.hpp
 	source/capture-filter.hpp
 	source/output-filter.hpp
 	source/device.hpp
