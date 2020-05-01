@@ -242,8 +242,9 @@ namespace DShow {
             if (SUCCEEDED(hr)) {
                 std::ifstream file(filePath);
                 
-                if (file.good()) {
+                if (file.is_open()) {
                     nlohmann::json camSettings  = nlohmann::json::parse(file);
+                    file.close();
 
                     if (!camSettings.empty()) {
                         SetDeviceSettings(enumMoniker, camSettings);
@@ -272,8 +273,9 @@ namespace DShow {
                 GetDeviceSettings(enumMoniker, camSettings);
 
                 std::ofstream file(filePath);
-                if (file.good()) {
+                if (file.is_open()) {
                     file << std::setw(4) << camSettings << std::endl;
+                    file.close();
                 }
             }
         }

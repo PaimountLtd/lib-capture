@@ -28,6 +28,8 @@
 
 #include <vector>
 
+#define SETTINGS_FILE "device-settings.json"
+
 namespace DShow {
 
 Device::Device(InitGraph initialize) :
@@ -94,11 +96,11 @@ bool Device::SetAudioConfig(AudioConfig *config)
 }
 
 void Device::SaveSettings(const std::string& filePath) {
-    SaveSettingsToFile(filePath + "device-settings.json");
+	SaveSettingsToFile(filePath + SETTINGS_FILE);
 }
 
 void Device::LoadSettings(const std::string& filePath) {
-    LoadSettingsFromFile(filePath + "device-settings.json");
+	LoadSettingsFromFile(filePath + SETTINGS_FILE);
 }
 
 bool Device::ConnectFilters()
