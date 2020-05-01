@@ -11,7 +11,7 @@ namespace DShow {
     }
 
     void DeviceDialogBox::Open(IUnknown* filter) {
-        if (!isOpen) {
+        if (!isOpen || WaitForSingleObject(threadHandle, 0) == WAIT_OBJECT_0) {
             deviceFilter = filter;
             threadHandle = CreateThread(nullptr, 0, CallCreate, (void*) this, 0, &threadId);
 
@@ -44,7 +44,6 @@ namespace DShow {
             }
         }
 
-        isOpen = false;
         return 0;
     }
 }
