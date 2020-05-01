@@ -36,149 +36,32 @@ namespace DShow {
                     const std::string pathStr(_bstr_t(path.bstrVal, true));
 
                     auto settings = std::find_if(camSettings.begin(), camSettings.end(), [nameStr, pathStr](const nlohmann::json& j) {
-                        return j.is_object() and j.value("DevicePath", "") == pathStr and j.value("DeviceName", "") == nameStr;
+                        return j.is_object() && j.value("DevicePath", "") == pathStr && j.value("DeviceName", "") == nameStr;
                     });
 
                     hr = moniker->BindToObject(nullptr, nullptr, IID_IAMVideoProcAmp, (void **) &videoProcSettings);
                     if (SUCCEEDED(hr) && settings != camSettings.end()) {
-                        auto backlightCompensation = settings->find("BacklightCompensation");
-                        auto backLightCompensation_flag = settings->find("BacklightCompensation_flag");
-                        if (backlightCompensation != settings->end() && backLightCompensation_flag != settings->end()) {
-                            videoProcSettings->Set(VideoProcAmp_BacklightCompensation,
-                                    backlightCompensation.value(),
-                                    backLightCompensation_flag.value() == "manual" ? VideoProcAmp_Flags_Manual : VideoProcAmp_Flags_Auto);
-                        }
-
-                        auto brightness = settings->find("Brightness");
-                        auto brightness_flag = settings->find("Brightness_flag");
-                        if (brightness != settings->end() && brightness_flag != settings->end()) {
-                            videoProcSettings->Set(VideoProcAmp_Brightness,
-                                    brightness.value(),
-                                    brightness_flag.value() == "manual" ? VideoProcAmp_Flags_Manual : VideoProcAmp_Flags_Auto);
-                        }
-
-                        auto colorEnable = settings->find("ColorEnable");
-                        auto colorEnable_flag = settings->find("ColorEnable_flag");
-                        if (colorEnable != settings->end() && colorEnable_flag != settings->end()) {
-                            videoProcSettings->Set(VideoProcAmp_ColorEnable,
-                                    colorEnable.value(),
-                                    colorEnable_flag.value() == "manual" ? VideoProcAmp_Flags_Manual : VideoProcAmp_Flags_Auto);
-                        }
-
-                        auto contrast = settings->find("Contrast");
-                        auto contrast_flag = settings->find("Contrast_flag");
-                        if (contrast != settings->end() && contrast_flag != settings->end()) {
-                            videoProcSettings->Set(VideoProcAmp_Contrast,
-                                    contrast.value(),
-                                    contrast_flag.value() == "manual" ? VideoProcAmp_Flags_Manual : VideoProcAmp_Flags_Auto);
-                        }
-
-                        auto gain = settings->find("Gain");
-                        auto gain_flag = settings->find("Gain_flag");
-                        if (gain != settings->end() && gain_flag != settings->end()) {
-                            videoProcSettings->Set(VideoProcAmp_Gain,
-                                    gain.value(),
-                                    gain_flag.value() == "manual" ? VideoProcAmp_Flags_Manual : VideoProcAmp_Flags_Auto);
-                        }
-
-                        auto gamma = settings->find("Gamma");
-                        auto gamma_flag = settings->find("Gamma_flag");
-                        if (gamma != settings->end() && gamma_flag != settings->end()) {
-                            videoProcSettings->Set(VideoProcAmp_Gamma,
-                                    gamma.value(),
-                                    gamma_flag.value() == "manual" ? VideoProcAmp_Flags_Manual : VideoProcAmp_Flags_Auto);
-                        }
-
-                        auto hue = settings->find("Hue");
-                        auto hue_flag = settings->find("Hue_flag");
-                        if (hue != settings->end() && hue_flag != settings->end()) {
-                            videoProcSettings->Set(VideoProcAmp_Hue,
-                                    hue.value(),
-                                    hue_flag.value() == "manual" ? VideoProcAmp_Flags_Manual : VideoProcAmp_Flags_Auto);
-                        }
-
-                        auto saturation = settings->find("Saturation");
-                        auto saturation_flag = settings->find("Saturation_flag");
-                        if (saturation != settings->end() && saturation_flag != settings->end()) {
-                            videoProcSettings->Set(VideoProcAmp_Saturation,
-                                    saturation.value(),
-                                    saturation_flag.value() == "manual" ? VideoProcAmp_Flags_Manual : VideoProcAmp_Flags_Auto);
-                        }
-
-                        auto sharpness = settings->find("Sharpness");
-                        auto sharpness_flag = settings->find("Sharpness_flag");
-                        if (sharpness != settings->end() && sharpness_flag != settings->end()) {
-                            videoProcSettings->Set(VideoProcAmp_Sharpness,
-                                    sharpness.value(),
-                                    sharpness_flag.value() == "manual" ? VideoProcAmp_Flags_Manual : VideoProcAmp_Flags_Auto);
-                        }
-
-                        auto whiteBalance = settings->find("WhiteBalance");
-                        auto whiteBalance_flag = settings->find("WhiteBalance_flag");
-                        if (whiteBalance != settings->end() && whiteBalance_flag != settings->end()) {
-                            videoProcSettings->Set(VideoProcAmp_WhiteBalance,
-                                    whiteBalance.value(),
-                                    whiteBalance_flag.value() == "manual" ? VideoProcAmp_Flags_Manual : VideoProcAmp_Flags_Auto);
-                        }
+                        SetVideoProcSetting(videoProcSettings, settings, VideoProcAmp_BacklightCompensation, "BacklightCompensation", "BacklightCompensation_flag");
+                        SetVideoProcSetting(videoProcSettings, settings, VideoProcAmp_Brightness, "Brightness", "Brightness_flag");
+                        SetVideoProcSetting(videoProcSettings, settings, VideoProcAmp_ColorEnable, "ColorEnable", "ColorEnable_flag");
+                        SetVideoProcSetting(videoProcSettings, settings, VideoProcAmp_Contrast, "Contrast", "Contrast_flag");
+                        SetVideoProcSetting(videoProcSettings, settings, VideoProcAmp_Gain, "Gain", "Gain_flag");
+                        SetVideoProcSetting(videoProcSettings, settings, VideoProcAmp_Gamma, "Gamma", "Gamma_flag");
+                        SetVideoProcSetting(videoProcSettings, settings, VideoProcAmp_Hue, "Hue", "Hue_flag");
+                        SetVideoProcSetting(videoProcSettings, settings, VideoProcAmp_Saturation, "Saturation", "Saturation_flag");
+                        SetVideoProcSetting(videoProcSettings, settings, VideoProcAmp_Sharpness, "Sharpness", "Sharpness_flag");
+                        SetVideoProcSetting(videoProcSettings, settings, VideoProcAmp_WhiteBalance, "WhiteBalance", "WhiteBalance_flag");
                     }
 
                     hr = moniker->BindToObject(nullptr, nullptr, IID_IAMCameraControl, (void **) &camControlSettings);
                     if (SUCCEEDED(hr)) {
-                        auto exposure = settings->find("Exposure");
-                        auto exposure_flag = settings->find("Exposure_flag");
-                        if (exposure != settings->end() && exposure_flag != settings->end()) {
-                            camControlSettings->Set(CameraControl_Exposure,
-                                    exposure.value(),
-                                    exposure_flag.value() == "manual" ? CameraControl_Flags_Manual : CameraControl_Flags_Auto);
-                        }
-
-                        auto focus = settings->find("Focus");
-                        auto focus_flag = settings->find("Focus_flag");
-                        if (focus != settings->end() && focus_flag != settings->end()) {
-                            camControlSettings->Set(CameraControl_Focus,
-                                    focus.value(),
-                                    focus_flag.value() == "manual" ? CameraControl_Flags_Manual : CameraControl_Flags_Auto);
-                        }
-
-                        auto iris = settings->find("Iris");
-                        auto iris_flag = settings->find("Iris_flag");
-                        if (iris != settings->end() && iris_flag != settings->end()) {
-                            camControlSettings->Set(CameraControl_Iris,
-                                    iris.value(),
-                                    iris_flag.value() == "manual" ? CameraControl_Flags_Manual : CameraControl_Flags_Auto);
-                        }
-
-                        auto pan = settings->find("Pan");
-                        auto pan_flag = settings->find("Pan_flag");
-                        if (pan != settings->end() && pan_flag != settings->end()) {
-                            camControlSettings->Set(CameraControl_Pan,
-                                    pan.value(),
-                                    pan_flag.value() == "manual" ? CameraControl_Flags_Manual : CameraControl_Flags_Auto);
-                        }
-
-                        auto roll = settings->find("Roll");
-                        auto roll_flag = settings->find("Roll_flag");
-                        if (roll != settings->end() && roll_flag != settings->end()) {
-                            camControlSettings->Set(CameraControl_Roll,
-                                    roll.value(),
-                                    roll_flag.value() == "manual" ? CameraControl_Flags_Manual : CameraControl_Flags_Auto);
-                        }
-
-                        auto tilt = settings->find("Tilt");
-                        auto tilt_flag = settings->find("Tilt_flag");
-                        if (tilt != settings->end() && tilt_flag != settings->end()) {
-                            camControlSettings->Set(CameraControl_Tilt,
-                                    tilt.value(),
-                                    tilt_flag.value() == "manual" ? CameraControl_Flags_Manual : CameraControl_Flags_Auto);
-                        }
-
-                        auto zoom = settings->find("Zoom");
-                        auto zoom_flag = settings->find("Zoom_flag");
-                        if (zoom != settings->end() && zoom_flag != settings->end()) {
-                            camControlSettings->Set(CameraControl_Zoom,
-                                    zoom.value(),
-                                    zoom_flag.value() == "manual" ? CameraControl_Flags_Manual : CameraControl_Flags_Auto);
-                        }
+                        SetCamControlSetting(camControlSettings, settings, CameraControl_Exposure, "Exposure", "Exposure_flag");
+                        SetCamControlSetting(camControlSettings, settings, CameraControl_Focus, "Focus", "Focus_flag");
+                        SetCamControlSetting(camControlSettings, settings, CameraControl_Iris, "Iris", "Iris_flag");
+                        SetCamControlSetting(camControlSettings, settings, CameraControl_Pan, "Pan", "Pan_flag");
+                        SetCamControlSetting(camControlSettings, settings, CameraControl_Roll, "Roll", "Roll_flag");
+                        SetCamControlSetting(camControlSettings, settings, CameraControl_Tilt, "Tilt", "Tilt_flag");
+                        SetCamControlSetting(camControlSettings, settings, CameraControl_Zoom, "Zoom", "Zoom_flag");
                     }
                 }
             }
@@ -393,6 +276,28 @@ namespace DShow {
                     file << std::setw(4) << camSettings << std::endl;
                 }
             }
+        }
+    }
+
+    void SetVideoProcSetting(IAMVideoProcAmp *videoProcSettings, nlohmann::detail::iter_impl<nlohmann::json> &settings,
+            tagVideoProcAmpProperty videoProcProperty,const std::string& settingName, const std::string& flagName) {
+        auto setting = settings->find(settingName);
+        auto flag = settings->find(flagName);
+        if (setting != settings->end() && flag != settings->end()) {
+            videoProcSettings->Set(videoProcProperty,
+                    setting.value(),
+                    flag.value() == "manual" ? VideoProcAmp_Flags_Manual : VideoProcAmp_Flags_Auto);
+        }
+    }
+
+    void SetCamControlSetting(IAMCameraControl *camControlSettings, nlohmann::detail::iter_impl<nlohmann::json> &settings,
+            tagCameraControlProperty camControlProperty, const std::string& settingName, const std::string& flagName) {
+        auto setting = settings->find(settingName);
+        auto flag = settings->find(flagName);
+        if (setting != settings->end() && flag != settings->end()) {
+            camControlSettings->Set(camControlProperty,
+                    setting.value(),
+                    flag.value() == "manual" ? CameraControl_Flags_Manual : CameraControl_Flags_Auto);
         }
     }
 };
