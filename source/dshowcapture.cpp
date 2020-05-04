@@ -20,6 +20,7 @@
 #include "../dshowcapture.hpp"
 #include "dshow-base.hpp"
 #include "dshow-enum.hpp"
+#include "dshow-dialogbox.hpp"
 #include "device.hpp"
 #include "dshow-device-defs.hpp"
 #include "log.hpp"
@@ -27,8 +28,11 @@
 #include <vector>
 
 namespace DShow {
-
-Device::Device(InitGraph initialize) : context(new HDevice)
+Device::Device(InitGraph initialize) :
+	context(new HDevice),
+	videoDialog(new DeviceDialogBox),
+	crossbarDialog(new DeviceDialogBox),
+	audioDialog(new DeviceDialogBox)
 {
 	if (initialize == InitGraph::True)
 		context->CreateGraph();
@@ -36,6 +40,9 @@ Device::Device(InitGraph initialize) : context(new HDevice)
 
 Device::~Device()
 {
+	delete videoDialog;
+	delete crossbarDialog;
+	delete audioDialog;
 	delete context;
 }
 
@@ -134,25 +141,6 @@ bool Device::GetAudioDeviceId(DeviceId &id) const
 	return true;
 }
 
-static void OpenPropertyPages(HWND hwnd, IUnknown *propertyObject)
-{
-	if (!propertyObject)
-		return;
-
-	ComQIPtr<ISpecifyPropertyPages> pages(propertyObject);
-	CAUUID cauuid;
-
-	if (pages != NULL) {
-		if (SUCCEEDED(pages->GetPages(&cauuid)) && cauuid.cElems) {
-			OleCreatePropertyFrame(hwnd, 0, 0, NULL, 1,
-					       (LPUNKNOWN *)&propertyObject,
-					       cauuid.cElems, cauuid.pElems, 0,
-					       0, NULL);
-			CoTaskMemFree(cauuid.pElems);
-		}
-	}
-}
-
 void Device::OpenDialog(void *hwnd, DialogType type) const
 {
 	ComPtr<IUnknown> ptr;
@@ -193,7 +181,21 @@ void Device::OpenDialog(void *hwnd, DialogType type) const
 		return;
 	}
 
-	OpenPropertyPages((HWND)hwnd, ptr);
+	if (type == DialogType::ConfigVideo) {
+		videoDialog->Open(ptr);
+	} else if (type == DialogType::ConfigCrossbar ||
+		type == DialogType::ConfigCrossbar2) {
+		crossbarDialog->Open(ptr);
+	} else if (type == DialogType::ConfigAudio) {
+		audioDialog->Open(ptr);
+	}
+}
+
+void Device::CloseDialog()
+{
+	videoDialog->Close();
+	crossbarDialog->Close();
+	audioDialog->Close();
 }
 
 static void EnumEncodedVideo(std::vector<VideoDevice> &devices,
