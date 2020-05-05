@@ -249,6 +249,8 @@ namespace DShow {
                     if (!camSettings.empty()) {
                         SetDeviceSettings(enumMoniker, camSettings);
                     }
+                } else {
+                    SaveSettingsToFile(filePath);
                 }
             }
         }

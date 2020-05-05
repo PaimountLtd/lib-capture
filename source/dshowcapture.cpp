@@ -36,8 +36,7 @@ Device::Device(InitGraph initialize) :
 	context(new HDevice),
 	videoDialog(new DeviceDialogBox),
 	crossbarDialog(new DeviceDialogBox),
-	audioDialog(new DeviceDialogBox),
-	settings()
+	audioDialog(new DeviceDialogBox)
 {
 	if (initialize == InitGraph::True)
 		context->CreateGraph();
