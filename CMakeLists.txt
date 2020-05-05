@@ -79,6 +79,7 @@ set(libdshowcapture_SOURCES
 	source/dshow-media-type.cpp
 	source/dshow-encoded-device.cpp
 	source/dshow-dialogbox.cpp
+	source/dshow-settings.cpp
 	source/log.cpp)
 
 set(libdshowcapture_HEADERS
@@ -95,6 +96,7 @@ set(libdshowcapture_HEADERS
 	source/dshow-formats.hpp
 	source/dshow-media-type.hpp
 	source/dshow-dialogbox.hpp
+	source/dshow-settings.hpp
 	source/log.hpp)
 
 add_library(libdshowcapture

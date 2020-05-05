@@ -225,6 +225,9 @@ public:
 	bool SetVideoConfig(VideoConfig *config);
 	bool SetAudioConfig(AudioConfig *config);
 
+	void SaveSettings(const std::string& filePath);
+	void LoadSettings(const std::string& filePath);
+
 	/**
 		 * Connects all the configured filters together.
 		 *

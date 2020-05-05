@@ -21,13 +21,17 @@
 #include "dshow-base.hpp"
 #include "dshow-enum.hpp"
 #include "dshow-dialogbox.hpp"
+#include "dshow-settings.hpp"
 #include "device.hpp"
 #include "dshow-device-defs.hpp"
 #include "log.hpp"
 
 #include <vector>
 
+#define SETTINGS_FILE "device-settings.json"
+
 namespace DShow {
+
 Device::Device(InitGraph initialize) :
 	context(new HDevice),
 	videoDialog(new DeviceDialogBox),
@@ -90,6 +94,14 @@ bool Device::SetAudioConfig(AudioConfig *config)
 	return context->SetAudioConfig(config);
 }
 
+void Device::SaveSettings(const std::string& filePath) {
+	SaveSettingsToFile(filePath + SETTINGS_FILE);
+}
+
+void Device::LoadSettings(const std::string& filePath) {
+	LoadSettingsFromFile(filePath + SETTINGS_FILE);
+}
+
 bool Device::ConnectFilters()
 {
 	return context->ConnectFilters();
@@ -139,6 +151,25 @@ bool Device::GetAudioDeviceId(DeviceId &id) const
 
 	id = context->audioConfig;
 	return true;
+}
+
+static void OpenPropertyPages(HWND hwnd, IUnknown *propertyObject)
+{
+	if (!propertyObject)
+		return;
+
+	ComQIPtr<ISpecifyPropertyPages> pages(propertyObject);
+	CAUUID cauuid;
+
+	if (pages != NULL) {
+		if (SUCCEEDED(pages->GetPages(&cauuid)) && cauuid.cElems) {
+			OleCreatePropertyFrame(hwnd, 0, 0, NULL, 1,
+					       (LPUNKNOWN *)&propertyObject,
+					       cauuid.cElems, cauuid.pElems, 0,
+					       0, NULL);
+			CoTaskMemFree(cauuid.pElems);
+		}
+	}
 }
 
 void Device::OpenDialog(void *hwnd, DialogType type) const
