@@ -205,11 +205,6 @@ struct AudioConfig : Config {
 	AudioMode mode = AudioMode::Capture;
 };
 
-enum SettingsFlags {
-    Auto	= 0x1,
-    Manual	= 0x2
-};
-
 class DSHOWCAPTURE_EXPORT Device {
 	HDevice *context;
 	DeviceDialogBox *videoDialog;
