@@ -6,7 +6,7 @@
 #include "dshow-settings.hpp"
 
 namespace DShow {
-    void SetDeviceSettings(IEnumMoniker *enumMoniker, nlohmann::json &camSettings) {
+    void SetDeviceSettings(IEnumMoniker *enumMoniker, json_t *devices) {
         ComPtr<IMoniker> moniker;
         ComPtr<IAMVideoProcAmp> videoProcSettings;
         ComPtr<IAMCameraControl> camControlSettings;
@@ -23,59 +23,72 @@ namespace DShow {
                 continue;
             }
 
-            VARIANT path, name;
-            path.vt = VT_BSTR;
+            VARIANT name;
             name.vt = VT_BSTR;
 
             hr = propertyBag->Read(L"FriendlyName", &name, nullptr);
             if (SUCCEEDED(hr)) {
+                if (!json_is_array(devices))
+                    return;
+
                 const std::string nameStr(_bstr_t(name.bstrVal, true));
+                size_t index = 0;
+                json_t *device = nullptr;
 
-                hr = propertyBag->Read(L"DevicePath", &path, nullptr);
+                json_array_foreach (devices, index, device) {
+                    json_t * obj = json_object_get(device, "DevicePath");
+                    if (!json_is_string(obj))
+                        continue;
+
+                    const char *name = json_string_value(obj);
+                    if (nameStr.compare(name) == 0) {
+                        device = json_array_get(devices, index);
+                        break;
+                    }
+                }
+
+                if (!device) {
+                    devices = json_array();
+                    json_array_append_new(devices, device);
+                }
+
                 if (SUCCEEDED(hr)) {
-                    const std::string pathStr(_bstr_t(path.bstrVal, true));
-
-                    auto settings = std::find_if(camSettings.begin(), camSettings.end(), [nameStr, pathStr](const nlohmann::json& j) {
-                        return j.is_object() && j.value("DevicePath", "") == pathStr && j.value("DeviceName", "") == nameStr;
-                    });
-
                     hr = moniker->BindToObject(nullptr, nullptr, IID_IAMVideoProcAmp, (void **) &videoProcSettings);
-                    if (SUCCEEDED(hr) && settings != camSettings.end()) {
-                        SetVideoProcSetting(videoProcSettings, settings, VideoProcAmp_BacklightCompensation, "BacklightCompensation", "BacklightCompensation_flag");
-                        SetVideoProcSetting(videoProcSettings, settings, VideoProcAmp_Brightness, "Brightness", "Brightness_flag");
-                        SetVideoProcSetting(videoProcSettings, settings, VideoProcAmp_ColorEnable, "ColorEnable", "ColorEnable_flag");
-                        SetVideoProcSetting(videoProcSettings, settings, VideoProcAmp_Contrast, "Contrast", "Contrast_flag");
-                        SetVideoProcSetting(videoProcSettings, settings, VideoProcAmp_Gain, "Gain", "Gain_flag");
-                        SetVideoProcSetting(videoProcSettings, settings, VideoProcAmp_Gamma, "Gamma", "Gamma_flag");
-                        SetVideoProcSetting(videoProcSettings, settings, VideoProcAmp_Hue, "Hue", "Hue_flag");
-                        SetVideoProcSetting(videoProcSettings, settings, VideoProcAmp_Saturation, "Saturation", "Saturation_flag");
-                        SetVideoProcSetting(videoProcSettings, settings, VideoProcAmp_Sharpness, "Sharpness", "Sharpness_flag");
-                        SetVideoProcSetting(videoProcSettings, settings, VideoProcAmp_WhiteBalance, "WhiteBalance", "WhiteBalance_flag");
+                    if (SUCCEEDED(hr)) {
+                        SetVideoProcSetting(videoProcSettings, device, VideoProcAmp_BacklightCompensation, "BacklightCompensation", "BacklightCompensation_flag");
+                        SetVideoProcSetting(videoProcSettings, device, VideoProcAmp_Brightness, "Brightness", "Brightness_flag");
+                        SetVideoProcSetting(videoProcSettings, device, VideoProcAmp_ColorEnable, "ColorEnable", "ColorEnable_flag");
+                        SetVideoProcSetting(videoProcSettings, device, VideoProcAmp_Contrast, "Contrast", "Contrast_flag");
+                        SetVideoProcSetting(videoProcSettings, device, VideoProcAmp_Gain, "Gain", "Gain_flag");
+                        SetVideoProcSetting(videoProcSettings, device, VideoProcAmp_Gamma, "Gamma", "Gamma_flag");
+                        SetVideoProcSetting(videoProcSettings, device, VideoProcAmp_Hue, "Hue", "Hue_flag");
+                        SetVideoProcSetting(videoProcSettings, device, VideoProcAmp_Saturation, "Saturation", "Saturation_flag");
+                        SetVideoProcSetting(videoProcSettings, device, VideoProcAmp_Sharpness, "Sharpness", "Sharpness_flag");
+                        SetVideoProcSetting(videoProcSettings, device, VideoProcAmp_WhiteBalance, "WhiteBalance", "WhiteBalance_flag");
                     }
 
                     hr = moniker->BindToObject(nullptr, nullptr, IID_IAMCameraControl, (void **) &camControlSettings);
                     if (SUCCEEDED(hr)) {
-                        SetCamControlSetting(camControlSettings, settings, CameraControl_Exposure, "Exposure", "Exposure_flag");
-                        SetCamControlSetting(camControlSettings, settings, CameraControl_Focus, "Focus", "Focus_flag");
-                        SetCamControlSetting(camControlSettings, settings, CameraControl_Iris, "Iris", "Iris_flag");
-                        SetCamControlSetting(camControlSettings, settings, CameraControl_Pan, "Pan", "Pan_flag");
-                        SetCamControlSetting(camControlSettings, settings, CameraControl_Roll, "Roll", "Roll_flag");
-                        SetCamControlSetting(camControlSettings, settings, CameraControl_Tilt, "Tilt", "Tilt_flag");
-                        SetCamControlSetting(camControlSettings, settings, CameraControl_Zoom, "Zoom", "Zoom_flag");
+                        SetCamControlSetting(camControlSettings, device, CameraControl_Exposure, "Exposure", "Exposure_flag");
+                        SetCamControlSetting(camControlSettings, device, CameraControl_Focus, "Focus", "Focus_flag");
+                        SetCamControlSetting(camControlSettings, device, CameraControl_Iris, "Iris", "Iris_flag");
+                        SetCamControlSetting(camControlSettings, device, CameraControl_Pan, "Pan", "Pan_flag");
+                        SetCamControlSetting(camControlSettings, device, CameraControl_Roll, "Roll", "Roll_flag");
+                        SetCamControlSetting(camControlSettings, device, CameraControl_Tilt, "Tilt", "Tilt_flag");
+                        SetCamControlSetting(camControlSettings, device, CameraControl_Zoom, "Zoom", "Zoom_flag");
                     }
                 }
             }
         }
     }
 
-    void GetDeviceSettings(IEnumMoniker *enumMoniker, nlohmann::json &camSettings)
+    void GetDeviceSettings(IEnumMoniker *enumMoniker, json_t *device)
     {
         ComPtr<IMoniker> moniker;
         ComPtr<IAMVideoProcAmp> camVideoSettings;
         ComPtr<IAMCameraControl> camControlSettings;
         ComPtr<IPropertyBag> propertyBag;
         long value, flag;
-        nlohmann::json settings;
         HRESULT hr;
 
         if (enumMoniker == nullptr) {
@@ -93,13 +106,13 @@ namespace DShow {
                 hr = propertyBag->Read(L"DevicePath", &path, nullptr);
                 if (SUCCEEDED(hr)) {
                     const std::string pathStr(_bstr_t(path.bstrVal, true));
-                    settings.emplace("DevicePath", pathStr);
+		            json_object_set(device, "DevicePath", json_string(pathStr.c_str()));
                 }
 
                 hr = propertyBag->Read(L"FriendlyName", &name, nullptr);
                 if (SUCCEEDED(hr)) {
                     const std::string nameStr(_bstr_t(name.bstrVal, true));
-                    settings.emplace("DeviceName", nameStr);
+		            json_object_set(device, "DeviceName", json_string(nameStr.c_str()));
                 }
 
                 // Getting VideoProcAmp settings
@@ -107,67 +120,67 @@ namespace DShow {
                 if (SUCCEEDED(hr)) {
                     hr = camVideoSettings->Get(VideoProcAmp_BacklightCompensation, &value, &flag);
                     if (SUCCEEDED(hr)) {
-                        settings.emplace("BacklightCompensation", value);
-                        settings.emplace("BacklightCompensation_flag", (flag > VideoProcAmp_Flags_Auto ? "manual" : "auto"));
+			            json_object_set(device, "BacklightCompensation", json_integer(value));
+			            json_object_set(device, "BacklightCompensation_flag", json_string(flag > VideoProcAmp_Flags_Auto ? "manual" : "auto"));
                     }
 
                     hr = camVideoSettings->Get(VideoProcAmp_Brightness, &value, &flag);
                     if (SUCCEEDED(hr)) {
-                        settings.emplace("Brightness", value);
-                        settings.emplace("Brightness_flag", (flag > VideoProcAmp_Flags_Auto ? "manual" : "auto"));
+                        json_object_set(device, "Brightness", json_integer(value));
+                        json_object_set(device, "Brightness_flag", json_string(flag > VideoProcAmp_Flags_Auto ? "manual" : "auto"));
                     }
 
                     hr = camVideoSettings->Get(VideoProcAmp_ColorEnable, &value, &flag);
                     if (SUCCEEDED(hr)) {
-                        settings.emplace("ColorEnable", value);
-                        settings.emplace("ColorEnable_flag", (flag > VideoProcAmp_Flags_Auto ? "manual" : "auto"));
+                        json_object_set(device, "ColorEnable", json_integer(value));
+                        json_object_set(device, "ColorEnable_flag", json_string(flag > VideoProcAmp_Flags_Auto ? "manual" : "auto"));
                     }
 
                     hr = camVideoSettings->Get(VideoProcAmp_Contrast, &value, &flag);
                     if (SUCCEEDED(hr)) {
-                        settings.emplace("Contrast", value);
-                        settings.emplace("Contrast_flag", (flag > VideoProcAmp_Flags_Auto ? "manual" : "auto"));
+                        json_object_set(device, "Contrast", json_integer(value));
+                        json_object_set(device, "Contrast_flag", json_string(flag > VideoProcAmp_Flags_Auto ? "manual" : "auto"));
                     }
 
                     hr = camVideoSettings->Get(VideoProcAmp_Gain, &value, &flag);
                     if (SUCCEEDED(hr)) {
-                        settings.emplace("Gain", value);
-                        settings.emplace("Gain_flag", (flag > VideoProcAmp_Flags_Auto ? "manual" : "auto"));
+                        json_object_set(device, "Gain", json_integer(value));
+                        json_object_set(device, "Gain_flag", json_string(flag > VideoProcAmp_Flags_Auto ? "manual" : "auto"));
                     }
 
                     hr = camVideoSettings->Get(VideoProcAmp_Gamma, &value, &flag);
                     if (SUCCEEDED(hr)) {
-                        settings.emplace("Gamma", value);
-                        settings.emplace("Gamma_flag", (flag > VideoProcAmp_Flags_Auto ? "manual" : "auto"));
+                        json_object_set(device, "Gamma", json_integer(value));
+                        json_object_set(device, "Gamma_flag", json_string(flag > VideoProcAmp_Flags_Auto ? "manual" : "auto"));
                     }
 
                     hr = camVideoSettings->Get(VideoProcAmp_Hue, &value, &flag);
                     if (SUCCEEDED(hr)) {
-                        settings.emplace("Hue", value);
-                        settings.emplace("Hue_flag", (flag > VideoProcAmp_Flags_Auto ? "manual" : "auto"));
+                        json_object_set(device, "Hue", json_integer(value));
+                        json_object_set(device, "Hue_flag", json_string(flag > VideoProcAmp_Flags_Auto ? "manual" : "auto"));
                     }
 
                     hr = camVideoSettings->Get(VideoProcAmp_Saturation, &value, &flag);
                     if (SUCCEEDED(hr)) {
-                        settings.emplace("Saturation", value);
-                        settings.emplace("Saturation_flag", (flag > VideoProcAmp_Flags_Auto ? "manual" : "auto"));
+                        json_object_set(device, "Saturation", json_integer(value));
+                        json_object_set(device, "Saturation_flag", json_string(flag > VideoProcAmp_Flags_Auto ? "manual" : "auto"));
                     }
 
                     hr = camVideoSettings->Get(VideoProcAmp_Sharpness, &value, &flag);
                     if (SUCCEEDED(hr)) {
-                        settings.emplace("Sharpness", value);
-                        settings.emplace("Sharpness_flag", (flag > VideoProcAmp_Flags_Auto ? "manual" : "auto"));
+                        json_object_set(device, "Sharpness", json_integer(value));
+                        json_object_set(device, "Sharpness_flag", json_string(flag > VideoProcAmp_Flags_Auto ? "manual" : "auto"));
                     }
 
                     hr = camVideoSettings->Get(VideoProcAmp_WhiteBalance, &value, &flag);
                     if (SUCCEEDED(hr)) {
-                        settings.emplace("WhiteBalance", value);
+                        json_object_set(device, "WhiteBalance", json_integer(value));
 
                         // Some devices return flag value 3 when the flag is auto
                         if (flag == 3) {
-                            settings.emplace("WhiteBalance_flag", "auto");
+                            json_object_set(device, "WhiteBalance_flag", json_string("auto"));
                         } else {
-                            settings.emplace("WhiteBalance_flag", (flag > VideoProcAmp_Flags_Auto ? "manual" : "auto"));
+                            json_object_set(device, "WhiteBalance_flag", json_string(flag > VideoProcAmp_Flags_Auto ? "manual" : "auto"));
                         }
                     }
                 }
@@ -177,50 +190,48 @@ namespace DShow {
                 if (SUCCEEDED(hr)) {
                     hr = camControlSettings->Get(CameraControl_Exposure, &value, &flag);
                     if (SUCCEEDED(hr)) {
-                        settings.emplace("Exposure", value);
-                        settings.emplace("Exposure_flag", (flag > CameraControl_Flags_Auto ? "manual" : "auto"));
+                        json_object_set(device, "Exposure", json_integer(value));
+                        json_object_set(device, "Exposure_flag", json_string(flag > VideoProcAmp_Flags_Auto ? "manual" : "auto"));
                     }
 
                     hr = camControlSettings->Get(CameraControl_Focus, &value, &flag);
                     if (SUCCEEDED(hr)) {
-                        settings.emplace("Focus", value);
-                        settings.emplace("Focus_flag", (flag > CameraControl_Flags_Auto ? "manual" : "auto"));
+                        json_object_set(device, "Focus", json_integer(value));
+                        json_object_set(device, "Focus_flag", json_string(flag > VideoProcAmp_Flags_Auto ? "manual" : "auto"));
                     }
 
                     hr = camControlSettings->Get(CameraControl_Iris, &value, &flag);
                     if (SUCCEEDED(hr)) {
-                        settings.emplace("Iris", value);
-                        settings.emplace("Iris_flag", (flag > CameraControl_Flags_Auto ? "manual" : "auto"));
+                        json_object_set(device, "Iris", json_integer(value));
+                        json_object_set(device, "Iris_flag", json_string(flag > VideoProcAmp_Flags_Auto ? "manual" : "auto"));
                     }
 
                     hr = camControlSettings->Get(CameraControl_Pan, &value, &flag);
                     if (SUCCEEDED(hr)) {
-                        settings.emplace("Pan", value);
-                        settings.emplace("Pan_flag", (flag > CameraControl_Flags_Auto ? "manual" : "auto"));
+                        json_object_set(device, "Pan", json_integer(value));
+                        json_object_set(device, "Pan_flag", json_string(flag > VideoProcAmp_Flags_Auto ? "manual" : "auto"));
                     }
 
                     hr = camControlSettings->Get(CameraControl_Roll, &value, &flag);
                     if (SUCCEEDED(hr)) {
-                        settings.emplace("Roll", value);
-                        settings.emplace("Roll_flag", (flag > CameraControl_Flags_Auto ? "manual" : "auto"));
+                        json_object_set(device, "Roll", json_integer(value));
+                        json_object_set(device, "Roll_flag", json_string(flag > VideoProcAmp_Flags_Auto ? "manual" : "auto"));
                     }
 
                     hr = camControlSettings->Get(CameraControl_Tilt, &value, &flag);
                     if (SUCCEEDED(hr)) {
-                        settings.emplace("Tilt", value);
-                        settings.emplace("Tilt_flag", (flag > CameraControl_Flags_Auto ? "manual" : "auto"));
+                        json_object_set(device, "Tilt", json_integer(value));
+                        json_object_set(device, "Tilt_flag", json_string(flag > VideoProcAmp_Flags_Auto ? "manual" : "auto"));
                     }
 
                     hr = camControlSettings->Get(CameraControl_Zoom, &value, &flag);
                     if (SUCCEEDED(hr)) {
-                        settings.emplace("Zoom", value);
-                        settings.emplace("Zoom_flag", (flag > CameraControl_Flags_Auto ? "manual" : "auto"));
+                        json_object_set(device, "Zoom", json_integer(value));
+                        json_object_set(device, "Zoom_flag", json_string(flag > VideoProcAmp_Flags_Auto ? "manual" : "auto"));
                     }
                 }
             }
         }
-
-        camSettings.push_back(settings);
     }
 
     static recursive_mutex settingsMutex;
@@ -240,18 +251,14 @@ namespace DShow {
             hr = deviceEnum->CreateClassEnumerator(CLSID_VideoInputDeviceCategory, &enumMoniker, 0);
 
             if (SUCCEEDED(hr)) {
-                std::ifstream file(filePath);
-                
-                if (file.is_open()) {
-                    nlohmann::json camSettings  = nlohmann::json::parse(file);
-                    file.close();
+                json_t *devices;
+                json_error_t error;
 
-                    if (!camSettings.empty()) {
-                        SetDeviceSettings(enumMoniker, camSettings);
-                    }
-                } else {
+                devices = json_load_file(filePath.c_str(), 0, &error);
+                if(devices)
+                    SetDeviceSettings(enumMoniker, devices);
+                else
                     SaveSettingsToFile(filePath);
-                }
             }
         }
     }
@@ -271,37 +278,48 @@ namespace DShow {
             hr = deviceEnum->CreateClassEnumerator(CLSID_VideoInputDeviceCategory, &enumMoniker, 0);
 
             if (SUCCEEDED(hr)) {
-                nlohmann::json camSettings = nlohmann::json::array();
-                GetDeviceSettings(enumMoniker, camSettings);
-
-                std::ofstream file(filePath);
-                if (file.is_open()) {
-                    file << std::setw(4) << camSettings << std::endl;
-                    file.close();
-                }
+                json_t *devices = json_array();
+                GetDeviceSettings(enumMoniker, devices);
+                json_dump_file(devices, filePath.c_str(), JSON_ENSURE_ASCII);
             }
         }
     }
 
-    void SetVideoProcSetting(IAMVideoProcAmp *videoProcSettings, nlohmann::detail::iter_impl<nlohmann::json> &settings,
+    void SetVideoProcSetting(IAMVideoProcAmp *videoProcSettings, json_t *device,
             tagVideoProcAmpProperty videoProcProperty,const std::string& settingName, const std::string& flagName) {
-        auto setting = settings->find(settingName);
-        auto flag = settings->find(flagName);
-        if (setting != settings->end() && flag != settings->end()) {
+        if (!json_is_object(device))
+            return;
+
+        json_t *valueObj = json_object_get(device, settingName.c_str());
+
+        if (json_is_integer(valueObj)) {
+            int val = json_integer_value(valueObj);
+
+            json_t *flagObbj = json_object_get(device, flagName.c_str());
+            const char *flag = json_string_value(flagObbj);
+
             videoProcSettings->Set(videoProcProperty,
-                    setting.value(),
-                    flag.value() == "manual" ? VideoProcAmp_Flags_Manual : VideoProcAmp_Flags_Auto);
+                    val,
+                    strcmp(flag, "manual") == 0 ? VideoProcAmp_Flags_Manual : VideoProcAmp_Flags_Auto);
         }
     }
 
-    void SetCamControlSetting(IAMCameraControl *camControlSettings, nlohmann::detail::iter_impl<nlohmann::json> &settings,
+    void SetCamControlSetting(IAMCameraControl *camControlSettings, json_t *device,
             tagCameraControlProperty camControlProperty, const std::string& settingName, const std::string& flagName) {
-        auto setting = settings->find(settingName);
-        auto flag = settings->find(flagName);
-        if (setting != settings->end() && flag != settings->end()) {
+        if (!json_is_object(device))
+            return;
+
+        json_t *valueObj = json_object_get(device, settingName.c_str());
+
+        if (json_is_integer(valueObj)) {
+            int val = json_integer_value(valueObj);
+
+            json_t *flagObbj = json_object_get(device, flagName.c_str());
+            const char *flag = json_string_value(flagObbj);
+
             camControlSettings->Set(camControlProperty,
-                    setting.value(),
-                    flag.value() == "manual" ? CameraControl_Flags_Manual : CameraControl_Flags_Auto);
+                    val,
+                    strcmp(flag, "manual") == 0 ? VideoProcAmp_Flags_Manual : VideoProcAmp_Flags_Auto);
         }
     }
 };
