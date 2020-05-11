@@ -466,8 +466,8 @@ static bool EnumDevice(const GUID &type, IMoniker *deviceInfo,
 
 	propertyData->Read(L"DevicePath", &devicePath, NULL);
 
-	if(!activate)
-		return true;
+	// if(!activate)
+	// 	return true;
 
 	hr = deviceInfo->BindToObject(NULL, 0, IID_IBaseFilter,
 				      (void **)&filter);
