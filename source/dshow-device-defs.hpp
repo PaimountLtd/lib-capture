@@ -74,4 +74,13 @@ static const EncodedDevice AV_LGP = {COMMON_ENCODED_VFORMAT,
 				     69,
 				     COMMON_ENCODED_SAMPLERATE};
 
+static const EncodedDevice AV_DEFAULT = {COMMON_ENCODED_VFORMAT,
+				     0,
+				     COMMON_ENCODED_CX,
+				     COMMON_ENCODED_CY,
+				     COMMON_ENCODED_INTERVAL,
+				     AudioFormat::Any,
+				     0,
+				     COMMON_ENCODED_SAMPLERATE};
+
 }; /* namespace DShow */

@@ -286,6 +286,11 @@ static bool EnumVideoDevice(std::vector<VideoDevice> &devices,
 		return true;
 	}
 
+	if (filter == NULL) {
+		EnumEncodedVideo(devices, deviceName, devicePath, AV_DEFAULT);
+		return true;
+	}
+
 	bool success = GetFilterPin(filter, MEDIATYPE_Video,
 				    PIN_CATEGORY_CAPTURE, PINDIR_OUTPUT, &pin);
 
@@ -333,15 +338,15 @@ static bool EnumAudioDevice(vector<AudioDevice> &devices, IBaseFilter *filter,
 {
 	ComPtr<IPin> pin;
 	AudioDevice info;
+	if (filter) {
+		bool success = GetFilterPin(filter, MEDIATYPE_Audio,
+					PIN_CATEGORY_CAPTURE, PINDIR_OUTPUT, &pin);
+		if (!success)
+			return true;
 
-	bool success = GetFilterPin(filter, MEDIATYPE_Audio,
-				    PIN_CATEGORY_CAPTURE, PINDIR_OUTPUT, &pin);
-	if (!success)
-		return true;
-
-	if (!EnumAudioCaps(pin, info.caps))
-		return true;
-
+		if (!EnumAudioCaps(pin, info.caps))
+			return true;
+	}
 	info.name = deviceName;
 	if (devicePath)
 		info.path = devicePath;

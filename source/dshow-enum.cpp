@@ -466,15 +466,18 @@ static bool EnumDevice(const GUID &type, IMoniker *deviceInfo,
 
 	propertyData->Read(L"DevicePath", &devicePath, NULL);
 
-	// if(!activate)
-	// 	return true;
-
-	hr = deviceInfo->BindToObject(NULL, 0, IID_IBaseFilter,
-				      (void **)&filter);
-	if (SUCCEEDED(hr)) {
-		if (!callback(param, filter, deviceName.bstrVal,
-			      devicePath.bstrVal))
-			return false;
+	if (activate) {
+		hr = deviceInfo->BindToObject(NULL, 0, IID_IBaseFilter,
+						(void **)&filter);
+		if (SUCCEEDED(hr)) {
+			if (!callback(param, filter, deviceName.bstrVal,
+					devicePath.bstrVal))
+					return false;
+		}
+	} else {
+		if (!callback(param, NULL, deviceName.bstrVal,
+				devicePath.bstrVal))
+				return false;
 	}
 
 	return true;
