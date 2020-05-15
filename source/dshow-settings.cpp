@@ -6,6 +6,27 @@
 #include "dshow-settings.hpp"
 
 namespace DShow {
+    size_t FindDeviceSettings(json_t* devices, std::string path) {
+        size_t index = 0;
+        json_t *device = nullptr;
+        bool found = false;
+
+        json_array_foreach (devices, index, device) {
+            json_t *obj = json_object_get(device, "DevicePath");
+            if (!json_is_string(obj))
+                continue;
+
+            const char *current_path = json_string_value(obj);
+            if (path.compare(current_path) == 0) {
+                device = json_array_get(devices, index);
+                found = true;
+                break;
+            }
+        }
+
+        return found ? index : 0;
+    }
+
     void SetDeviceSettings(IEnumMoniker *enumMoniker, json_t *devices) {
         ComPtr<IMoniker> moniker;
         ComPtr<IAMVideoProcAmp> videoProcSettings;
@@ -17,80 +38,57 @@ namespace DShow {
             return;
         }
 
-        if (!json_is_array(devices)) {
+        if (!json_is_array(devices))
             return;
-        }
 
         while (enumMoniker->Next(1, &moniker, nullptr) == S_OK) {
             hr = moniker->BindToStorage(nullptr, nullptr, IID_IPropertyBag, (void **)&propertyBag);
-            if (FAILED(hr)) {
+            if (FAILED(hr))
                 continue;
+
+            VARIANT path;
+            size_t index = 0;
+            json_t *device = nullptr;
+
+            path.vt = VT_BSTR;
+            hr = propertyBag->Read(L"DevicePath", &path, nullptr);
+            if (FAILED(hr))
+                continue;
+
+            index = FindDeviceSettings(devices, std::string(_bstr_t(path.bstrVal, true)));
+            if (!index && !json_array_size(device))
+                continue;
+            else
+                device = json_array_get(devices, index);
+
+            hr = moniker->BindToObject(nullptr, nullptr, IID_IAMVideoProcAmp, (void **) &videoProcSettings);
+            if (SUCCEEDED(hr)) {
+                SetVideoProcSetting(videoProcSettings, device, VideoProcAmp_BacklightCompensation, "BacklightCompensation", "BacklightCompensation_flag");
+                SetVideoProcSetting(videoProcSettings, device, VideoProcAmp_Brightness, "Brightness", "Brightness_flag");
+                SetVideoProcSetting(videoProcSettings, device, VideoProcAmp_ColorEnable, "ColorEnable", "ColorEnable_flag");
+                SetVideoProcSetting(videoProcSettings, device, VideoProcAmp_Contrast, "Contrast", "Contrast_flag");
+                SetVideoProcSetting(videoProcSettings, device, VideoProcAmp_Gain, "Gain", "Gain_flag");
+                SetVideoProcSetting(videoProcSettings, device, VideoProcAmp_Gamma, "Gamma", "Gamma_flag");
+                SetVideoProcSetting(videoProcSettings, device, VideoProcAmp_Hue, "Hue", "Hue_flag");
+                SetVideoProcSetting(videoProcSettings, device, VideoProcAmp_Saturation, "Saturation", "Saturation_flag");
+                SetVideoProcSetting(videoProcSettings, device, VideoProcAmp_Sharpness, "Sharpness", "Sharpness_flag");
+                SetVideoProcSetting(videoProcSettings, device, VideoProcAmp_WhiteBalance, "WhiteBalance", "WhiteBalance_flag");
             }
 
-            VARIANT path, name;
-            path.vt = VT_BSTR;
-            name.vt = VT_BSTR;
-
-            hr = propertyBag->Read(L"FriendlyName", &name, nullptr);
+            hr = moniker->BindToObject(nullptr, nullptr, IID_IAMCameraControl, (void **) &camControlSettings);
             if (SUCCEEDED(hr)) {
-                const std::string nameStr(_bstr_t(name.bstrVal, true));
-
-                size_t index = 0;
-                json_t *device = nullptr;
-
-                hr = propertyBag->Read(L"DevicePath", &path, nullptr);
-                if (SUCCEEDED(hr)) {
-                    const std::string pathStr(_bstr_t(path.bstrVal, true));
-
-                    json_array_foreach (devices, index, device) {
-                        json_t * obj = json_object_get(device, "DevicePath");
-                        if (!json_is_string(obj))
-                            continue;
-
-                        const char *path = json_string_value(obj);
-                        if (pathStr.compare(path) == 0) {
-                            device = json_array_get(devices, index);
-                            break;
-                        }
-                    }
-
-                    if (!device) {
-                        devices = json_array();
-                        json_array_append_new(devices, device);
-                    }
-
-                    if (SUCCEEDED(hr)) {
-                        hr = moniker->BindToObject(nullptr, nullptr, IID_IAMVideoProcAmp, (void **) &videoProcSettings);
-                        if (SUCCEEDED(hr)) {
-                            SetVideoProcSetting(videoProcSettings, device, VideoProcAmp_BacklightCompensation, "BacklightCompensation", "BacklightCompensation_flag");
-                            SetVideoProcSetting(videoProcSettings, device, VideoProcAmp_Brightness, "Brightness", "Brightness_flag");
-                            SetVideoProcSetting(videoProcSettings, device, VideoProcAmp_ColorEnable, "ColorEnable", "ColorEnable_flag");
-                            SetVideoProcSetting(videoProcSettings, device, VideoProcAmp_Contrast, "Contrast", "Contrast_flag");
-                            SetVideoProcSetting(videoProcSettings, device, VideoProcAmp_Gain, "Gain", "Gain_flag");
-                            SetVideoProcSetting(videoProcSettings, device, VideoProcAmp_Gamma, "Gamma", "Gamma_flag");
-                            SetVideoProcSetting(videoProcSettings, device, VideoProcAmp_Hue, "Hue", "Hue_flag");
-                            SetVideoProcSetting(videoProcSettings, device, VideoProcAmp_Saturation, "Saturation", "Saturation_flag");
-                            SetVideoProcSetting(videoProcSettings, device, VideoProcAmp_Sharpness, "Sharpness", "Sharpness_flag");
-                            SetVideoProcSetting(videoProcSettings, device, VideoProcAmp_WhiteBalance, "WhiteBalance", "WhiteBalance_flag");
-                        }
-
-                        hr = moniker->BindToObject(nullptr, nullptr, IID_IAMCameraControl, (void **) &camControlSettings);
-                        if (SUCCEEDED(hr)) {
-                            SetCamControlSetting(camControlSettings, device, CameraControl_Exposure, "Exposure", "Exposure_flag");
-                            SetCamControlSetting(camControlSettings, device, CameraControl_Focus, "Focus", "Focus_flag");
-                            SetCamControlSetting(camControlSettings, device, CameraControl_Iris, "Iris", "Iris_flag");
-                            SetCamControlSetting(camControlSettings, device, CameraControl_Pan, "Pan", "Pan_flag");
-                            SetCamControlSetting(camControlSettings, device, CameraControl_Roll, "Roll", "Roll_flag");
-                            SetCamControlSetting(camControlSettings, device, CameraControl_Tilt, "Tilt", "Tilt_flag");
-                            SetCamControlSetting(camControlSettings, device, CameraControl_Zoom, "Zoom", "Zoom_flag");
-                        }
-                    }
-                }
+                SetCamControlSetting(camControlSettings, device, CameraControl_Exposure, "Exposure", "Exposure_flag");
+                SetCamControlSetting(camControlSettings, device, CameraControl_Focus, "Focus", "Focus_flag");
+                SetCamControlSetting(camControlSettings, device, CameraControl_Iris, "Iris", "Iris_flag");
+                SetCamControlSetting(camControlSettings, device, CameraControl_Pan, "Pan", "Pan_flag");
+                SetCamControlSetting(camControlSettings, device, CameraControl_Roll, "Roll", "Roll_flag");
+                SetCamControlSetting(camControlSettings, device, CameraControl_Tilt, "Tilt", "Tilt_flag");
+                SetCamControlSetting(camControlSettings, device, CameraControl_Zoom, "Zoom", "Zoom_flag");
             }
         }
     }
 
-    void GetDeviceSettings(IEnumMoniker *enumMoniker, json_t *devices)
+    void GetDeviceSettings(IEnumMoniker *enumMoniker, json_t **devices)
     {
         ComPtr<IMoniker> moniker;
         ComPtr<IAMVideoProcAmp> camVideoSettings;
@@ -98,6 +96,7 @@ namespace DShow {
         ComPtr<IPropertyBag> propertyBag;
         long value, flag;
         HRESULT hr;
+        size_t index = 0;
 
         if (enumMoniker == nullptr) {
             return;
@@ -107,15 +106,22 @@ namespace DShow {
             hr = moniker->BindToStorage(nullptr, nullptr, IID_IPropertyBag, (void **)&propertyBag);
 
             if (SUCCEEDED(hr)) {
-                json_t *device = json_object();
                 VARIANT path, name;
                 path.vt = VT_BSTR;
                 name.vt = VT_BSTR;
+                json_t *device = nullptr;
 
                 hr = propertyBag->Read(L"DevicePath", &path, nullptr);
                 if (SUCCEEDED(hr)) {
-                    const std::string pathStr(_bstr_t(path.bstrVal, true));
-                    json_object_set(device, "DevicePath", json_string(pathStr.c_str()));
+                    const std::string pathStr(_bstr_t(path.bstrVal, true));                 
+                    index = FindDeviceSettings(*devices, std::string(_bstr_t(path.bstrVal, true)));
+                    if (!index && !json_array_size(*devices)) {
+                        device = json_object();
+                        json_array_append_new(*devices, device);
+                        json_object_set(device, "DevicePath", json_string(pathStr.c_str()));
+                    } else {
+                        device = json_array_get(*devices, index);
+                    }
                 }
 
                 hr = propertyBag->Read(L"FriendlyName", &name, nullptr);
@@ -239,9 +245,8 @@ namespace DShow {
                         json_object_set(device, "Zoom_flag", json_string(flag > VideoProcAmp_Flags_Auto ? "manual" : "auto"));
                     }
                 }
-
-                json_array_append(devices, device);
-                json_decref(device);
+                json_array_set(*devices, index, device);
+                break;
             }
         }
     }
@@ -291,9 +296,10 @@ namespace DShow {
             hr = deviceEnum->CreateClassEnumerator(CLSID_VideoInputDeviceCategory, &enumMoniker, 0);
 
             if (SUCCEEDED(hr)) {
-                json_t *devices = json_array();
-                GetDeviceSettings(enumMoniker, devices);
-                json_dump_file(devices, filePath.c_str(), JSON_INDENT(2)|JSON_ENSURE_ASCII);
+                json_error_t error;
+                json_t *devices = json_load_file(filePath.c_str(), 0, &error);
+                GetDeviceSettings(enumMoniker, &devices);
+                json_dump_file(devices, filePath.c_str(), JSON_INDENT(2) | JSON_ENSURE_ASCII);
                 json_decref(devices);
             }
         }
