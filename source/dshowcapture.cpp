@@ -208,7 +208,8 @@ static void EnumEncodedVideo(std::vector<VideoDevice> &devices,
 	VideoInfo caps;
 
 	device.name = deviceName;
-	device.path = devicePath;
+	if (devicePath)
+		device.path = devicePath;
 	device.audioAttached = true;
 	device.separateAudioFilter = false;
 
