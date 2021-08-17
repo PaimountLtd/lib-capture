@@ -151,6 +151,15 @@ void Device::OpenDialog(void *hwnd, DialogType type) const
 		ptr = context->videoFilter;
 	} else if (type == DialogType::ConfigCrossbar ||
 		   type == DialogType::ConfigCrossbar2) {
+		if (context == NULL) {
+			Warning(L"Invalid crossbar context");
+			return;
+		}
+		if (context->builder == NULL) {
+			Warning(L"Invalid crossbar context builder");
+			return;
+		}
+
 		hr = context->builder->FindInterface(NULL, NULL,
 						     context->videoFilter,
 						     IID_IAMCrossbar,
