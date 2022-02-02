@@ -340,6 +340,8 @@ bool HDevice::SetupVideoCapture(IBaseFilter *filter, VideoConfig &config)
 		info.expectedSubType = MEDIASUBTYPE_RGB32;
 	else if (videoConfig.format == VideoFormat::ARGB)
 		info.expectedSubType = MEDIASUBTYPE_ARGB32;
+	else if (videoConfig.format == VideoFormat::RGB24)
+		info.expectedSubType = MEDIASUBTYPE_RGB24;
 	else if (videoConfig.format == VideoFormat::YVYU)
 		info.expectedSubType = MEDIASUBTYPE_YVYU;
 	else if (videoConfig.format == VideoFormat::YUY2)
@@ -530,7 +532,7 @@ bool HDevice::SetupAudioOutput(IBaseFilter *filter, AudioConfig &config)
 	}
 
 	audioFilter = filter;
-	audioOutput = outputFilter;
+	audioOutput = std::move(outputFilter);
 
 	graph->AddFilter(audioOutput, L"Audio Output Filter");
 	if (!config.useVideoDevice)
