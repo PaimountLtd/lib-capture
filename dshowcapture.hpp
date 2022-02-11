@@ -80,12 +80,14 @@ enum class VideoFormat {
 	/* raw formats */
 	ARGB = 100,
 	XRGB,
+	RGB24,
 
 	/* planar YUV formats */
 	I420 = 200,
 	NV12,
 	YV12,
 	Y800,
+	P010,
 
 	/* packed YUV formats */
 	YVYU = 300,
