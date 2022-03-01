@@ -142,7 +142,7 @@ bool Device::GetAudioDeviceId(DeviceId &id) const
 	return true;
 }
 
-void Device::OpenDialog(void *hwnd, DialogType type) const
+void Device::OpenDialog(void */*hwnd*/, DialogType type) const
 {
 	ComPtr<IUnknown> ptr;
 	HRESULT hr;
