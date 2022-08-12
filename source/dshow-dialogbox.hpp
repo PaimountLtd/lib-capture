@@ -17,7 +17,7 @@ namespace DShow {
             return obj->Create();
         }
 
-        IUnknown* deviceFilter;
+        ComPtr<IUnknown> deviceFilter;
         DWORD threadId;
         HANDLE threadHandle;
         bool isOpen;
