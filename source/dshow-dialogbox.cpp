@@ -3,7 +3,6 @@
 
 namespace DShow {
     DeviceDialogBox::DeviceDialogBox() :
-        deviceFilter(nullptr),
         threadId(0),
         threadHandle(nullptr),
         isOpen(false)
@@ -16,6 +15,7 @@ namespace DShow {
             threadHandle = CreateThread(nullptr, 0, CallCreate, (void*) this, 0, &threadId);
 
             if (threadHandle == nullptr) {
+                deviceFilter.Clear();
                 Warning(L"Could not create thread for filter dialog box");
             }
         }
@@ -30,19 +30,22 @@ namespace DShow {
     }
 
     DWORD DeviceDialogBox::Create() {
-        ComQIPtr<ISpecifyPropertyPages> pages(deviceFilter);
+        ComQIPtr<ISpecifyPropertyPages> pages(deviceFilter.Get());
         CAUUID cauuid;
 
         if (pages != nullptr) {
             if (SUCCEEDED(pages->GetPages(&cauuid)) && cauuid.cElems) {
                 isOpen = true;
+                IUnknown* objects[] = {deviceFilter.Get()};
                 OleCreatePropertyFrame(nullptr, 0, 0, nullptr, 1,
-                                       (LPUNKNOWN *)&deviceFilter,
+                                       objects,
                                        cauuid.cElems, cauuid.pElems, 0,
                                        0, nullptr);
                 CoTaskMemFree(cauuid.pElems);
             }
+            pages.Clear();
         }
+        deviceFilter.Clear();
 
         return 0;
     }
