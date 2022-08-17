@@ -60,6 +60,8 @@ typedef std::function<void(const AudioConfig &config, unsigned char *data,
 			   size_t size, long long startTime, long long stopTime)>
 	AudioProc;
 
+typedef std::function<void()> ReactivateProc;
+
 enum class InitGraph {
 	False,
 	True,
@@ -98,6 +100,7 @@ enum class VideoFormat {
 	/* encoded formats */
 	MJPEG = 400,
 	H264,
+	HEVC,
 };
 
 enum class AudioFormat {
@@ -164,6 +167,7 @@ struct Config : DeviceId {
 
 struct VideoConfig : Config {
 	VideoProc callback;
+	ReactivateProc reactivateCallback;
 
 	/** Desired width/height of video. */
 	int cx = 0, cy_abs = 0;
@@ -207,6 +211,16 @@ struct AudioConfig : Config {
 	AudioMode mode = AudioMode::Capture;
 };
 
+struct VideoDeviceProperty {
+	long property;
+	long flags;
+	long val;
+	long min;
+	long max;
+	long step;
+	long def;
+};
+
 class DSHOWCAPTURE_EXPORT Device {
 	HDevice *context;
 	DeviceDialogBox *videoDialog;
@@ -226,6 +240,10 @@ public:
 
 	bool SetVideoConfig(VideoConfig *config);
 	bool SetAudioConfig(AudioConfig *config);
+	bool SetCameraControlProperties(
+		std::vector<VideoDeviceProperty> *properties);
+	bool
+	SetVideoProcAmpProperties(std::vector<VideoDeviceProperty> *properties);
 
 	/**
 		 * Connects all the configured filters together.
@@ -239,6 +257,10 @@ public:
 
 	bool GetVideoConfig(VideoConfig &config) const;
 	bool GetAudioConfig(AudioConfig &config) const;
+	bool GetCameraControlProperties(
+		std::vector<VideoDeviceProperty> &properties) const;
+	bool GetVideoProcAmpProperties(
+		std::vector<VideoDeviceProperty> &properties) const;
 	bool GetVideoDeviceId(DeviceId &id) const;
 	bool GetAudioDeviceId(DeviceId &id) const;
 
