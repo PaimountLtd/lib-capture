@@ -32,8 +32,7 @@ namespace DShow {
 #define VIDEO_PIN_NAME L"Video Capture"
 #define AUDIO_PIN_NAME L"Audio Capture"
 
-CapturePin::CapturePin(CaptureFilter *filter_, const PinCaptureInfo &info)
-	: refCount(0), captureInfo(info), filter(filter_)
+CapturePin::CapturePin(CaptureFilter *filter_, const PinCaptureInfo &info) : refCount(0), captureInfo(info), filter(filter_)
 {
 	connectedMediaType->majortype = info.expectedMajorType;
 }
@@ -88,20 +87,17 @@ STDMETHODIMP CapturePin::Connect(IPin *pReceivePin, const AM_MEDIA_TYPE *pmt)
 	if (!pmt)
 		return S_OK;
 
-	if (pmt->majortype != GUID_NULL &&
-	    pmt->majortype != captureInfo.expectedMajorType)
+	if (pmt->majortype != GUID_NULL && pmt->majortype != captureInfo.expectedMajorType)
 		return S_FALSE;
 
-	if (pmt->majortype == captureInfo.expectedMajorType &&
-	    !IsValidMediaType(pmt))
+	if (pmt->majortype == captureInfo.expectedMajorType && !IsValidMediaType(pmt))
 		return S_FALSE;
 
 	DSHOW_UNUSED(pReceivePin);
 	return S_OK;
 }
 
-STDMETHODIMP CapturePin::ReceiveConnection(IPin *pConnector,
-					   const AM_MEDIA_TYPE *pmt)
+STDMETHODIMP CapturePin::ReceiveConnection(IPin *pConnector, const AM_MEDIA_TYPE *pmt)
 {
 	PrintFunc(L"CapturePin::ReceiveConnection");
 
@@ -249,8 +245,7 @@ STDMETHODIMP CapturePin::EndFlush()
 	return S_OK;
 }
 
-STDMETHODIMP CapturePin::NewSegment(REFERENCE_TIME tStart, REFERENCE_TIME tStop,
-				    double dRate)
+STDMETHODIMP CapturePin::NewSegment(REFERENCE_TIME tStart, REFERENCE_TIME tStop, double dRate)
 {
 	PrintFunc(L"CapturePin::NewSegment");
 
@@ -269,8 +264,7 @@ STDMETHODIMP CapturePin::GetAllocator(IMemAllocator **ppAllocator)
 	return VFW_E_NO_ALLOCATOR;
 }
 
-STDMETHODIMP CapturePin::NotifyAllocator(IMemAllocator *pAllocator,
-					 BOOL bReadOnly)
+STDMETHODIMP CapturePin::NotifyAllocator(IMemAllocator *pAllocator, BOOL bReadOnly)
 {
 	PrintFunc(L"CapturePin::NotifyAllocator");
 
@@ -300,8 +294,7 @@ STDMETHODIMP CapturePin::Receive(IMediaSample *pSample)
 	return S_OK;
 }
 
-STDMETHODIMP CapturePin::ReceiveMultiple(IMediaSample **pSamples, long nSamples,
-					 long *nSamplesProcessed)
+STDMETHODIMP CapturePin::ReceiveMultiple(IMediaSample **pSamples, long nSamples, long *nSamplesProcessed)
 {
 	PrintFunc(L"CapturePin::ReceiveMultiple");
 
@@ -325,8 +318,7 @@ STDMETHODIMP CapturePin::ReceiveCanBlock()
 bool CapturePin::IsValidMediaType(const AM_MEDIA_TYPE *pmt) const
 {
 	if (pmt->pbFormat) {
-		if (pmt->subtype != captureInfo.expectedSubType ||
-		    pmt->majortype != captureInfo.expectedMajorType)
+		if (pmt->subtype != captureInfo.expectedSubType || pmt->majortype != captureInfo.expectedMajorType)
 			return false;
 
 		if (captureInfo.expectedMajorType == MEDIATYPE_Video) {
@@ -361,10 +353,7 @@ public:
 		return NOERROR;
 	}
 
-	STDMETHODIMP_(ULONG) AddRef()
-	{
-		return InterlockedIncrement(&refCount);
-	}
+	STDMETHODIMP_(ULONG) AddRef() { return InterlockedIncrement(&refCount); }
 
 	STDMETHODIMP_(ULONG) Release()
 	{
@@ -376,19 +365,10 @@ public:
 		return refCount;
 	}
 
-	STDMETHODIMP_(ULONG) GetMiscFlags()
-	{
-		return AM_FILTER_MISC_FLAGS_IS_RENDERER;
-	}
+	STDMETHODIMP_(ULONG) GetMiscFlags() { return AM_FILTER_MISC_FLAGS_IS_RENDERER; }
 };
 
-CaptureFilter::CaptureFilter(const PinCaptureInfo &info)
-	: refCount(0),
-	  state(State_Stopped),
-	  pin(new CapturePin(this, info)),
-	  misc(new MiscFlagsHandler)
-{
-}
+CaptureFilter::CaptureFilter(const PinCaptureInfo &info) : refCount(0), state(State_Stopped), pin(new CapturePin(this, info)), misc(new MiscFlagsHandler) {}
 
 CaptureFilter::~CaptureFilter() {}
 
@@ -544,8 +524,7 @@ STDMETHODIMP CaptureFilter::QueryVendorInfo(LPWSTR *pVendorInfo)
 
 // ============================================================================
 
-CaptureEnumPins::CaptureEnumPins(CaptureFilter *filter_, CaptureEnumPins *pEnum)
-	: filter(filter_)
+CaptureEnumPins::CaptureEnumPins(CaptureFilter *filter_, CaptureEnumPins *pEnum) : filter(filter_)
 {
 	curPin = (pEnum != nullptr) ? pEnum->curPin : 0;
 }
@@ -652,9 +631,7 @@ STDMETHODIMP_(ULONG) CaptureEnumMediaTypes::Release()
 }
 
 // IEnumMediaTypes
-STDMETHODIMP CaptureEnumMediaTypes::Next(ULONG cMediaTypes,
-					 AM_MEDIA_TYPE **ppMediaTypes,
-					 ULONG *pcFetched)
+STDMETHODIMP CaptureEnumMediaTypes::Next(ULONG cMediaTypes, AM_MEDIA_TYPE **ppMediaTypes, ULONG *pcFetched)
 {
 	PrintFunc(L"CaptureEnumMediaTypes::Next");
 

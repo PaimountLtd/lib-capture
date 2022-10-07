@@ -33,13 +33,9 @@
 #define DSHOWCAPTURE_VERSION_MINOR 8
 #define DSHOWCAPTURE_VERSION_PATCH 7
 
-#define MAKE_DSHOWCAPTURE_VERSION(major, minor, patch) \
-	((major << 24) | (minor << 16) | (patch))
+#define MAKE_DSHOWCAPTURE_VERSION(major, minor, patch) ((major << 24) | (minor << 16) | (patch))
 
-#define DSHOWCAPTURE_VERSION                                  \
-	MAKE_DSHOWCAPTURE_VERSION(DSHOWCAPTURE_VERSION_MAJOR, \
-				  DSHOWCAPTURE_VERSION_MINOR, \
-				  DSHOWCAPTURE_VERSION_PATCH)
+#define DSHOWCAPTURE_VERSION MAKE_DSHOWCAPTURE_VERSION(DSHOWCAPTURE_VERSION_MAJOR, DSHOWCAPTURE_VERSION_MINOR, DSHOWCAPTURE_VERSION_PATCH)
 
 #define DSHOW_MAX_PLANES 8
 
@@ -51,14 +47,9 @@ struct VideoConfig;
 struct AudioConfig;
 struct DeviceDialogBox;
 
-typedef std::function<void(const VideoConfig &config, unsigned char *data,
-			   size_t size, long long startTime, long long stopTime,
-			   long rotation)>
-	VideoProc;
+typedef std::function<void(const VideoConfig &config, unsigned char *data, size_t size, long long startTime, long long stopTime, long rotation)> VideoProc;
 
-typedef std::function<void(const AudioConfig &config, unsigned char *data,
-			   size_t size, long long startTime, long long stopTime)>
-	AudioProc;
+typedef std::function<void(const AudioConfig &config, unsigned char *data, size_t size, long long startTime, long long stopTime)> AudioProc;
 
 enum class InitGraph {
 	False,
@@ -217,9 +208,9 @@ public:
 	Device(InitGraph initialize = InitGraph::False);
 	~Device();
 
-	bool        Valid() const;
-	void        GetAccess();
-	void        ReleaseAccess();
+	bool Valid() const;
+	void GetAccess();
+	void ReleaseAccess();
 
 	bool ResetGraph();
 	void ShutdownGraph();
@@ -285,9 +276,7 @@ public:
 	bool SetConfig(VideoEncoderConfig &config);
 	bool GetConfig(VideoEncoderConfig &config) const;
 
-	bool Encode(unsigned char *data[DSHOW_MAX_PLANES],
-		    size_t linesize[DSHOW_MAX_PLANES], long long timestampStart,
-		    long long timestampEnd, EncoderPacket &packet,
+	bool Encode(unsigned char *data[DSHOW_MAX_PLANES], size_t linesize[DSHOW_MAX_PLANES], long long timestampStart, long long timestampEnd, EncoderPacket &packet,
 		    bool &new_packet);
 
 	static bool EnumEncoders(std::vector<DeviceId> &encoders);

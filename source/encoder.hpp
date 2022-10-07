@@ -77,9 +77,7 @@ struct HVideoEncoder {
 
 	bool SetConfig(VideoEncoderConfig &config);
 
-	bool Encode(unsigned char *frame[DSHOW_MAX_PLANES],
-		    size_t linesize[DSHOW_MAX_PLANES], long long timestampStart,
-		    long long timestampEnd, EncoderPacket &packet,
+	bool Encode(unsigned char *frame[DSHOW_MAX_PLANES], size_t linesize[DSHOW_MAX_PLANES], long long timestampStart, long long timestampEnd, EncoderPacket &packet,
 		    bool &new_packet);
 };
 

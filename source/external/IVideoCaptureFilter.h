@@ -41,131 +41,116 @@
 /*=============================================================================
 // FILTER INTERFACE
 =============================================================================*/
-#define VIDEO_CAPTURE_FILTER_NAME            "Elgato Game Capture HD"
-#define VIDEO_CAPTURE_FILTER_NAME_L         L"Elgato Game Capture HD"
+#define VIDEO_CAPTURE_FILTER_NAME "Elgato Game Capture HD"
+#define VIDEO_CAPTURE_FILTER_NAME_L L"Elgato Game Capture HD"
 
 // {39F50F4C-99E1-464a-B6F9-D605B4FB5918}
-DEFINE_GUID(CLSID_ElgatoVideoCaptureFilter,
-0x39f50f4c, 0x99e1, 0x464a, 0xb6, 0xf9, 0xd6, 0x5, 0xb4, 0xfb, 0x59, 0x18);
+DEFINE_GUID(CLSID_ElgatoVideoCaptureFilter, 0x39f50f4c, 0x99e1, 0x464a, 0xb6, 0xf9, 0xd6, 0x5, 0xb4, 0xfb, 0x59, 0x18);
 
 // {39F50F4C-99E1-464a-B6F9-D605B4FB5919}
-DEFINE_GUID(CLSID_ElgatoVideoCaptureFilterProperties,
-0x39f50f4c, 0x99e1, 0x464a, 0xb6, 0xf9, 0xd6, 0x5, 0xb4, 0xfb, 0x59, 0x19);
+DEFINE_GUID(CLSID_ElgatoVideoCaptureFilterProperties, 0x39f50f4c, 0x99e1, 0x464a, 0xb6, 0xf9, 0xd6, 0x5, 0xb4, 0xfb, 0x59, 0x19);
 
 // {39F50F4C-99E1-464a-B6F9-D605B4FB5920}
-DEFINE_GUID(IID_IElgatoVideoCaptureFilter,
-0x39f50f4c, 0x99e1, 0x464a, 0xb6, 0xf9, 0xd6, 0x5, 0xb4, 0xfb, 0x59, 0x20);
+DEFINE_GUID(IID_IElgatoVideoCaptureFilter, 0x39f50f4c, 0x99e1, 0x464a, 0xb6, 0xf9, 0xd6, 0x5, 0xb4, 0xfb, 0x59, 0x20);
 
 // {585B2914-252E-49bd-B730-7B4C40F4D4E5}
-DEFINE_GUID(IID_IElgatoVideoCaptureFilter2,
-0x585b2914, 0x252e, 0x49bd, 0xb7, 0x30, 0x7b, 0x4c, 0x40, 0xf4, 0xd4, 0xe5);
+DEFINE_GUID(IID_IElgatoVideoCaptureFilter2, 0x585b2914, 0x252e, 0x49bd, 0xb7, 0x30, 0x7b, 0x4c, 0x40, 0xf4, 0xd4, 0xe5);
 
 // {CC415EB7-B1C7-428c-9E5E-D9747DB4BE76}
-DEFINE_GUID(IID_IElgatoVideoCaptureFilter3,
-0xcc415eb7, 0xb1c7, 0x428c, 0x9e, 0x5e, 0xd9, 0x74, 0x7d, 0xb4, 0xbe, 0x76);
+DEFINE_GUID(IID_IElgatoVideoCaptureFilter3, 0xcc415eb7, 0xb1c7, 0x428c, 0x9e, 0x5e, 0xd9, 0x74, 0x7d, 0xb4, 0xbe, 0x76);
 
 // {197992FF-ED65-47CB-8032-D287AB40B33F}
-DEFINE_GUID(IID_IElgatoVideoCaptureFilter4,
-0x197992ff, 0xed65, 0x47cb, 0x80, 0x32, 0xd2, 0x87, 0xab, 0x40, 0xb3, 0x3f);
+DEFINE_GUID(IID_IElgatoVideoCaptureFilter4, 0x197992ff, 0xed65, 0x47cb, 0x80, 0x32, 0xd2, 0x87, 0xab, 0x40, 0xb3, 0x3f);
 
 // {7E6E9E9E-4062-4364-99B1-15C2F662B502}
-DEFINE_GUID(IID_IElgatoVideoCaptureFilter5,
-0x7e6e9e9e, 0x4062, 0x4364, 0x99, 0xb1, 0x15, 0xc2, 0xf6, 0x62, 0xb5, 0x2);
+DEFINE_GUID(IID_IElgatoVideoCaptureFilter5, 0x7e6e9e9e, 0x4062, 0x4364, 0x99, 0xb1, 0x15, 0xc2, 0xf6, 0x62, 0xb5, 0x2);
 
 /*=============================================================================
 // IElgatoVideoCaptureFilter
 =============================================================================*/
 
 //! Interface
-DECLARE_INTERFACE_(IElgatoVideoCaptureFilter, IUnknown)
-{
-};
+DECLARE_INTERFACE_(IElgatoVideoCaptureFilter, IUnknown){};
 
 /*=============================================================================
 // IElgatoVideoCaptureFilter2
 =============================================================================*/
 
 //! Video Capture device type
-enum VIDEO_CAPTURE_FILTER_DEVICE_TYPE
-{
-    VIDEO_CAPTURE_FILTER_DEVICE_TYPE_INVALID                = 0,            //!< Invalid
-    VIDEO_CAPTURE_FILTER_DEVICE_TYPE_GAME_CAPTURE_HD        = 2,            //!< Game Capture HD   (VID: 0x0fd9 PID: 0x0044, 0x004e, 0x0051)
-    VIDEO_CAPTURE_FILTER_DEVICE_TYPE_GAME_CAPTURE_HD60      = 8,            //!< Game Capture HD60 (VID: 0x0fd9 PID: 0x005c)
-    NUM_VIDEO_CAPTURE_FILTER_DEVICE_TYPE
+enum VIDEO_CAPTURE_FILTER_DEVICE_TYPE {
+	VIDEO_CAPTURE_FILTER_DEVICE_TYPE_INVALID = 0,           //!< Invalid
+	VIDEO_CAPTURE_FILTER_DEVICE_TYPE_GAME_CAPTURE_HD = 2,   //!< Game Capture HD   (VID: 0x0fd9 PID: 0x0044, 0x004e, 0x0051)
+	VIDEO_CAPTURE_FILTER_DEVICE_TYPE_GAME_CAPTURE_HD60 = 8, //!< Game Capture HD60 (VID: 0x0fd9 PID: 0x005c)
+	NUM_VIDEO_CAPTURE_FILTER_DEVICE_TYPE
 };
 
 //! Input device
-enum VIDEO_CAPTURE_FILTER_INPUT_DEVICE
-{
-    VIDEO_CAPTURE_FILTER_INPUT_DEVICE_INVALID               =   0,          //!< Invalid
-    VIDEO_CAPTURE_FILTER_INPUT_DEVICE_XBOX360               =   1,          //!< Microsoft Xbox 360
-    VIDEO_CAPTURE_FILTER_INPUT_DEVICE_PLAYSTATION3          =   2,          //!< Sony PlayStation 3
-    VIDEO_CAPTURE_FILTER_INPUT_DEVICE_IPAD                  =   3,          //!< Apple iPad
-    VIDEO_CAPTURE_FILTER_INPUT_DEVICE_IPOD_IPHONE           =   4,          //!< Apple iPod or iPhone
-    VIDEO_CAPTURE_FILTER_INPUT_DEVICE_WII                   =   5,          //!< Nintendo Wii
-    VIDEO_CAPTURE_FILTER_INPUT_DEVICE_OTHER                 =   6,          //!< Other
-    VIDEO_CAPTURE_FILTER_INPUT_DEVICE_WII_U                 =   7,          //!< Nintendo Wii U
-    VIDEO_CAPTURE_FILTER_INPUT_DEVICE_XBOX_ONE              =   8,          //!< Microsoft Xbox One
-    VIDEO_CAPTURE_FILTER_INPUT_DEVICE_PLAYSTATION4          =   9,          //!< Sony PlayStation 4
+enum VIDEO_CAPTURE_FILTER_INPUT_DEVICE {
+	VIDEO_CAPTURE_FILTER_INPUT_DEVICE_INVALID = 0,      //!< Invalid
+	VIDEO_CAPTURE_FILTER_INPUT_DEVICE_XBOX360 = 1,      //!< Microsoft Xbox 360
+	VIDEO_CAPTURE_FILTER_INPUT_DEVICE_PLAYSTATION3 = 2, //!< Sony PlayStation 3
+	VIDEO_CAPTURE_FILTER_INPUT_DEVICE_IPAD = 3,         //!< Apple iPad
+	VIDEO_CAPTURE_FILTER_INPUT_DEVICE_IPOD_IPHONE = 4,  //!< Apple iPod or iPhone
+	VIDEO_CAPTURE_FILTER_INPUT_DEVICE_WII = 5,          //!< Nintendo Wii
+	VIDEO_CAPTURE_FILTER_INPUT_DEVICE_OTHER = 6,        //!< Other
+	VIDEO_CAPTURE_FILTER_INPUT_DEVICE_WII_U = 7,        //!< Nintendo Wii U
+	VIDEO_CAPTURE_FILTER_INPUT_DEVICE_XBOX_ONE = 8,     //!< Microsoft Xbox One
+	VIDEO_CAPTURE_FILTER_INPUT_DEVICE_PLAYSTATION4 = 9, //!< Sony PlayStation 4
 };
 
 //! Video inputs
-enum VIDEO_CAPTURE_FILTER_VIDEO_INPUT
-{
-    VIDEO_CAPTURE_FILTER_VIDEO_INPUT_INVALID                =   0,          //!< Invalid
-    VIDEO_CAPTURE_FILTER_VIDEO_INPUT_COMPOSITE              =   1,          //!< Composite
-    VIDEO_CAPTURE_FILTER_VIDEO_INPUT_SVIDEO                 =   2,          //!< S-Video
-    VIDEO_CAPTURE_FILTER_VIDEO_INPUT_COMPONENT              =   3,          //!< Component
-    VIDEO_CAPTURE_FILTER_VIDEO_INPUT_HDMI                   =   4,          //!< HDMI
+enum VIDEO_CAPTURE_FILTER_VIDEO_INPUT {
+	VIDEO_CAPTURE_FILTER_VIDEO_INPUT_INVALID = 0,   //!< Invalid
+	VIDEO_CAPTURE_FILTER_VIDEO_INPUT_COMPOSITE = 1, //!< Composite
+	VIDEO_CAPTURE_FILTER_VIDEO_INPUT_SVIDEO = 2,    //!< S-Video
+	VIDEO_CAPTURE_FILTER_VIDEO_INPUT_COMPONENT = 3, //!< Component
+	VIDEO_CAPTURE_FILTER_VIDEO_INPUT_HDMI = 4,      //!< HDMI
 };
 
 //! Video encoder profile
-enum VIDEO_CAPTURE_FILTER_VID_ENC_PROFILE
-{
-    VIDEO_CAPTURE_FILTER_VID_ENC_PROFILE_INVALID            = 0x00000000,   //!< Invalid
-    VIDEO_CAPTURE_FILTER_VID_ENC_PROFILE_240                = 0x00000001,   //!< 320x240
-    VIDEO_CAPTURE_FILTER_VID_ENC_PROFILE_360                = 0x00000002,   //!< 480x360
-    VIDEO_CAPTURE_FILTER_VID_ENC_PROFILE_480                = 0x00000004,   //!< 640x480
-    VIDEO_CAPTURE_FILTER_VID_ENC_PROFILE_720                = 0x00000008,   //!< 1280x720
-    VIDEO_CAPTURE_FILTER_VID_ENC_PROFILE_1080               = 0x00000010,   //!< 1920x1080
+enum VIDEO_CAPTURE_FILTER_VID_ENC_PROFILE {
+	VIDEO_CAPTURE_FILTER_VID_ENC_PROFILE_INVALID = 0x00000000, //!< Invalid
+	VIDEO_CAPTURE_FILTER_VID_ENC_PROFILE_240 = 0x00000001,     //!< 320x240
+	VIDEO_CAPTURE_FILTER_VID_ENC_PROFILE_360 = 0x00000002,     //!< 480x360
+	VIDEO_CAPTURE_FILTER_VID_ENC_PROFILE_480 = 0x00000004,     //!< 640x480
+	VIDEO_CAPTURE_FILTER_VID_ENC_PROFILE_720 = 0x00000008,     //!< 1280x720
+	VIDEO_CAPTURE_FILTER_VID_ENC_PROFILE_1080 = 0x00000010,    //!< 1920x1080
 };
 
 //! Color range
-enum VIDEO_CAPTURE_FILTER_COLOR_RANGE
-{
-    VIDEO_CAPTURE_FILTER_COLOR_RANGE_INVALID                =   0,          //!< Invalid
-    VIDEO_CAPTURE_FILTER_COLOR_RANGE_FULL                   =   1,          //!< 0-255
-    VIDEO_CAPTURE_FILTER_COLOR_RANGE_LIMITED                =   2,          //!< 16-235
-    VIDEO_CAPTURE_FILTER_COLOR_RANGE_SHOOT                  =   3,          //!<
+enum VIDEO_CAPTURE_FILTER_COLOR_RANGE {
+	VIDEO_CAPTURE_FILTER_COLOR_RANGE_INVALID = 0, //!< Invalid
+	VIDEO_CAPTURE_FILTER_COLOR_RANGE_FULL = 1,    //!< 0-255
+	VIDEO_CAPTURE_FILTER_COLOR_RANGE_LIMITED = 2, //!< 16-235
+	VIDEO_CAPTURE_FILTER_COLOR_RANGE_SHOOT = 3,   //!<
 };
 
 //! Settings
-struct VIDEO_CAPTURE_FILTER_SETTINGS
-{
-    TCHAR                                deviceName[256];                   //!< Device name (get only)
-    VIDEO_CAPTURE_FILTER_INPUT_DEVICE    inputDevice;                       //!< Input device (e.g. Xbox360)
-    VIDEO_CAPTURE_FILTER_VIDEO_INPUT     videoInput;                        //!< Video input (e.g. HDMI)
-    VIDEO_CAPTURE_FILTER_VID_ENC_PROFILE profile;                           //!< Video encoder profile (maximum resolution)
-    BOOL                                 useAnalogAudioInput;               //!< for HDMI with analog audio input
-    VIDEO_CAPTURE_FILTER_COLOR_RANGE     hdmiColorRange;                    //!< HDMI color range
-    int                                  brightness;                        //!< Brightness (0-10000)
-    int                                  contrast;                          //!< Contrast   (0-10000)
-    int                                  saturation;                        //!< Saturation (0-10000)
-    int                                  hue;                               //!< Hue        (0-10000)
-    int                                  analogAudioGain;                   //!< Analog audio gain  (-60 - 12 dB)
-    int                                  digitalAudioGain;                  //!< Digital audio gain (-60 - 12 dB)
-    BOOL                                 preserveInputFormat;               //!< Input Format will be preserved (e.g. do not convert interlaced to progressive)
-    BOOL                                 stretchStandardDefinitionInput;    //!< Stretch SD input to 16:9
+struct VIDEO_CAPTURE_FILTER_SETTINGS {
+	TCHAR deviceName[256];                           //!< Device name (get only)
+	VIDEO_CAPTURE_FILTER_INPUT_DEVICE inputDevice;   //!< Input device (e.g. Xbox360)
+	VIDEO_CAPTURE_FILTER_VIDEO_INPUT videoInput;     //!< Video input (e.g. HDMI)
+	VIDEO_CAPTURE_FILTER_VID_ENC_PROFILE profile;    //!< Video encoder profile (maximum resolution)
+	BOOL useAnalogAudioInput;                        //!< for HDMI with analog audio input
+	VIDEO_CAPTURE_FILTER_COLOR_RANGE hdmiColorRange; //!< HDMI color range
+	int brightness;                                  //!< Brightness (0-10000)
+	int contrast;                                    //!< Contrast   (0-10000)
+	int saturation;                                  //!< Saturation (0-10000)
+	int hue;                                         //!< Hue        (0-10000)
+	int analogAudioGain;                             //!< Analog audio gain  (-60 - 12 dB)
+	int digitalAudioGain;                            //!< Digital audio gain (-60 - 12 dB)
+	BOOL preserveInputFormat;                        //!< Input Format will be preserved (e.g. do not convert interlaced to progressive)
+	BOOL stretchStandardDefinitionInput;             //!< Stretch SD input to 16:9
 };
 
 //! Interface
 DECLARE_INTERFACE_(IElgatoVideoCaptureFilter2, IElgatoVideoCaptureFilter)
 {
-    // Get current settings
-    STDMETHOD(GetSettings)(THIS_ VIDEO_CAPTURE_FILTER_SETTINGS *pSettings) PURE;
+	// Get current settings
+	STDMETHOD(GetSettings)(THIS_ VIDEO_CAPTURE_FILTER_SETTINGS * pSettings) PURE;
 
-    // Set settings
-    STDMETHOD(SetSettings)(THIS_ const VIDEO_CAPTURE_FILTER_SETTINGS *pcSettings) PURE;
+	// Set settings
+	STDMETHOD(SetSettings)(THIS_ const VIDEO_CAPTURE_FILTER_SETTINGS *pcSettings) PURE;
 };
 
 /*=============================================================================
@@ -175,9 +160,9 @@ DECLARE_INTERFACE_(IElgatoVideoCaptureFilter2, IElgatoVideoCaptureFilter)
 //! Interface
 DECLARE_INTERFACE_(IElgatoVideoCaptureFilter3, IElgatoVideoCaptureFilter2)
 {
-    //! Get A/V delay in milli-seconds (approximate delay between input signal and DirectShow
-    //! filter output)
-    STDMETHOD(GetDelayMs)(THIS_ int* pnDelayMs) PURE;
+	//! Get A/V delay in milli-seconds (approximate delay between input signal and DirectShow
+	//! filter output)
+	STDMETHOD(GetDelayMs)(THIS_ int *pnDelayMs) PURE;
 };
 
 /*=============================================================================
@@ -185,35 +170,34 @@ DECLARE_INTERFACE_(IElgatoVideoCaptureFilter3, IElgatoVideoCaptureFilter2)
 =============================================================================*/
 
 //! Messages
-enum VIDEO_CAPTURE_FILTER_NOTIFICATION
-{
+enum VIDEO_CAPTURE_FILTER_NOTIFICATION {
 	//! Description: Delay of the device has changed. Call GetDelayMs() to get the new delay.
-    VIDEO_CAPTURE_FILTER_NOTIFICATION_DEVICE_DELAY_CHANGED              = 110,      //!< Data: none
+	VIDEO_CAPTURE_FILTER_NOTIFICATION_DEVICE_DELAY_CHANGED = 110, //!< Data: none
 
 	//! Description: Output format has changed. Update your signal path accordingly.
-    VIDEO_CAPTURE_FILTER_NOTIFICATION_CAPTURE_OUTPUT_FORMAT_CHANGED     = 305,      //!< Data: none
+	VIDEO_CAPTURE_FILTER_NOTIFICATION_CAPTURE_OUTPUT_FORMAT_CHANGED = 305, //!< Data: none
 };
 
 //! Custom event that can be received by IMediaEvent::GetEvent. If SetNotificationCallback() was not set this method is used to send notifications.
 //! lEventCode = VIDEO_CAPTURE_FILTER_EVENT
 //! lParam1    = VIDEO_CAPTURE_FILTER_NOTIFICATION
 //! lParam2    = reserved for future use (e.g. notifications with additional data)
-#define VIDEO_CAPTURE_FILTER_EVENT		EC_USER + 0x0FD9
+#define VIDEO_CAPTURE_FILTER_EVENT EC_USER + 0x0FD9
 
 //! Message callback
-typedef void (CALLBACK* PFN_VIDEO_CAPTURE_FILTER_NOTIFICATION_CALLBACK)(VIDEO_CAPTURE_FILTER_NOTIFICATION nMessage, void* pData, int nSize, void* pContext);
+typedef void(CALLBACK *PFN_VIDEO_CAPTURE_FILTER_NOTIFICATION_CALLBACK)(VIDEO_CAPTURE_FILTER_NOTIFICATION nMessage, void *pData, int nSize, void *pContext);
 
 //! Interface
 DECLARE_INTERFACE_(IElgatoVideoCaptureFilter4, IElgatoVideoCaptureFilter3)
 {
-    //! Check device is present
-    STDMETHOD(GetDevicePresent)(THIS_ BOOL* pfDevicePresent) PURE;
+	//! Check device is present
+	STDMETHOD(GetDevicePresent)(THIS_ BOOL * pfDevicePresent) PURE;
 
-    //! Get current device type
-    STDMETHOD(GetDeviceType)(THIS_ VIDEO_CAPTURE_FILTER_DEVICE_TYPE* pnDeviceType) PURE;
+	//! Get current device type
+	STDMETHOD(GetDeviceType)(THIS_ VIDEO_CAPTURE_FILTER_DEVICE_TYPE * pnDeviceType) PURE;
 
-    //! Set callback to receive notifications
-    STDMETHOD(SetNotificationCallback)(THIS_ PFN_VIDEO_CAPTURE_FILTER_NOTIFICATION_CALLBACK pCallback, void* pContext) PURE;
+	//! Set callback to receive notifications
+	STDMETHOD(SetNotificationCallback)(THIS_ PFN_VIDEO_CAPTURE_FILTER_NOTIFICATION_CALLBACK pCallback, void *pContext) PURE;
 };
 
 /*=============================================================================
@@ -221,17 +205,16 @@ DECLARE_INTERFACE_(IElgatoVideoCaptureFilter4, IElgatoVideoCaptureFilter3)
 =============================================================================*/
 
 //! Extended Settings
-struct VIDEO_CAPTURE_FILTER_SETTINGS_EX
-{
-	VIDEO_CAPTURE_FILTER_SETTINGS		Settings;
-	BOOL								enableFullFrameRate;				//!< Enable full frame rate (50/60 fps)
-	BYTE								reserved[20 * 1024];
+struct VIDEO_CAPTURE_FILTER_SETTINGS_EX {
+	VIDEO_CAPTURE_FILTER_SETTINGS Settings;
+	BOOL enableFullFrameRate; //!< Enable full frame rate (50/60 fps)
+	BYTE reserved[20 * 1024];
 };
 
 DECLARE_INTERFACE_(IElgatoVideoCaptureFilter5, IElgatoVideoCaptureFilter4)
 {
 	//! Get current settings
-	STDMETHOD(GetSettingsEx)(THIS_ VIDEO_CAPTURE_FILTER_SETTINGS_EX *pSettings) PURE;
+	STDMETHOD(GetSettingsEx)(THIS_ VIDEO_CAPTURE_FILTER_SETTINGS_EX * pSettings) PURE;
 
 	//! Set settings
 	STDMETHOD(SetSettingsEx)(THIS_ const VIDEO_CAPTURE_FILTER_SETTINGS_EX *pcSettings) PURE;
