@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2014 Hugh Bailey <obs.jim@gmail.com>
+ *  Copyright (C) 2023 Lain Bailey <lain@obsproject.com>
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -30,8 +30,8 @@
 #endif
 
 #define DSHOWCAPTURE_VERSION_MAJOR 0
-#define DSHOWCAPTURE_VERSION_MINOR 8
-#define DSHOWCAPTURE_VERSION_PATCH 7
+#define DSHOWCAPTURE_VERSION_MINOR 9
+#define DSHOWCAPTURE_VERSION_PATCH 0
 
 #define MAKE_DSHOWCAPTURE_VERSION(major, minor, patch) \
 	((major << 24) | (minor << 16) | (patch))
